@@ -19,6 +19,7 @@ class Payment extends Model
         'status_payment',
     ];
 
+    
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class, 'appointment_id');
