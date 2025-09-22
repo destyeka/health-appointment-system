@@ -20,17 +20,17 @@ class MedicalRecord extends Model
         'notes',
     ];
 
-    // Relasi ke Appointment
-    public function appointment()
-    {
-        // id_appointment foreign key di medical_records
-        return $this->belongsTo(Appointment::class, 'id_appointment');
-    }
+    // // Relasi ke Appointment
+    // public function appointment()
+    // {
+    //     // id_appointment foreign key di medical_records
+    //     return $this->belongsTo(Appointment::class, 'id_appointment');
+    // }
 
-    // Relasi ke Prescription
-    public function prescription()
-    {
-        // id_prescription foreign key di medical_records
-        return $this->belongsTo(Prescription::class, 'id_prescription');
-    }
+    // // Relasi ke Prescription
+    // public function prescription()
+    // {
+    //     // id_prescription foreign key di medical_records
+    //     return $this->belongsTo(Prescription::class, 'id_prescription');
+    // }
 }

@@ -9,10 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('prescription_trackings', function (Blueprint $table) {
-            $table->id('prescription_id');
-            // $table->foreignId('id_record')
-            //       ->constrained()
-            //       ->onDelete('cascade');
+            $table->id('id_prescription');
+            $table->foreignId('id_record')->constrained('medical_records')->onDelete('cascade');
             $table->string('medication_name');
             $table->string('dosage');
             $table->string('frequency');

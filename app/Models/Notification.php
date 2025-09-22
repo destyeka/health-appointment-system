@@ -8,12 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Notification extends Model
 {
     use HasFactory;
-
-    protected $table = 'notification';
-
+    protected $primaryKey = 'id_notification';
     protected $fillable = [
-        'notification_id',
-        'appointment_id',
+        'id_notification',
+        'id_appointment',
         'status',
         'message',
         'sent_at',
@@ -23,6 +21,6 @@ class Notification extends Model
 
     public function appointment()
     {
-        return $this->belongsTo(Appointment::class, 'appointment_id');
+        return $this->belongsTo(Appointment::class, 'id_appointment');
     }
 }

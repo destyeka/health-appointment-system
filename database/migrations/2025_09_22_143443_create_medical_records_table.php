@@ -10,9 +10,8 @@ return new class extends Migration
     {
         Schema::create('medical_records', function (Blueprint $table) {
             $table->id('id_record'); 
-
-            // $table->foreignId('id_appointment')->references('id_appointment')->on('appointments')->onDelete('cascade');
-            // $table->foreignId('id_prescription')->references('id_prescription')->on('prescription_trackings')->onDelete('cascade'); 
+            $table->foreignId('id_appointment')->references('id_appointment')->on('appointments');
+            $table->foreignId('id_prescription')->references('id_prescription')->on('prescription_trackings');
             $table->string('diagnosis');
             $table->string('treatment');
             $table->text('notes')->nullable();

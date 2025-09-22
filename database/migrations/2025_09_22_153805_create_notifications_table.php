@@ -8,19 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('notification', function (Blueprint $table) {
+        Schema::create('notifications', function (Blueprint $table) {
             $table->string('notification_id')->primary();
             $table->string('appointment_id');
             $table->string('status');
             $table->text('message');
             $table->dateTime('sent_at');
-            
-            $table->foreign('appointment_id')->references('appointment_id')->on('appointments');
+
+            $table->foreignId('id_appointment')->constrained('appointments', 'id_appointment')->onDelete('cascade');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('notification');
+        Schema::dropIfExists('notifications');
     }
 };
