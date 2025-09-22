@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class PrescriptionTracking extends Model
+{
+    use HasFactory;
+
+    protected $primaryKey = 'prescription_id';
+
+    protected $fillable = [
+        'id_record',
+        'medication_name',
+        'dosage',
+        'frequency',
+        'duration',
+        'prescribed_at',
+    ];
+
+    protected $casts = [
+        'prescribed_at' => 'datetime',
+    ];
+
+    public function medicalRecord(): BelongsTo
+    {
+        return $this->belongsTo(MedicalRecord::class, 'id_record');
+    }
+}
