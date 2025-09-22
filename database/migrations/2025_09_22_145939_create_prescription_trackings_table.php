@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('prescription_trackings', function (Blueprint $table) {
             $table->id('prescription_id');
-            $table->foreignId('id_record')
-                  ->constrained()
-                  ->onDelete('cascade');
+            // $table->foreignId('id_record')
+            //       ->constrained()
+            //       ->onDelete('cascade');
             $table->string('medication_name');
             $table->string('dosage');
             $table->string('frequency');
