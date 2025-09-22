@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('telemedicines', function (Blueprint $table) {
             $table->string('id_session')->primary();
-            $table->string('id_appointment');
+            // $table->string('id_appointment');
             $table->string('session_link');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
