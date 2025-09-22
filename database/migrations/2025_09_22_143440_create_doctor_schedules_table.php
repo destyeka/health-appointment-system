@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('doctor_schedules', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('id_doctor')->references('id_doctor')->on('doctors')->onDelete('cascade');
+
+            $table->foreignId('id_doctor')->constrained(table: 'doctors', column: 'id_doctor')->onDelete('cascade');
+
             $table->string('day');
             $table->string('time');
-            $table->tinyInteger('patient_slot');
+            $table->unsignedTinyInteger('patient_slot');
             $table->timestamps();
         });
     }

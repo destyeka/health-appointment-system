@@ -12,7 +12,6 @@ class Telemedicine extends Model
     protected $table = 'telemedicine';
 
     protected $fillable = [
-        'id_session',
         'id_appointment',
         'session_link',
         'start_time',
@@ -20,10 +19,15 @@ class Telemedicine extends Model
         'status',
     ];
 
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'end_time'
+    ];
+
     public $timestamps = false;
 
     public function appointment()
     {
-        return $this->belongsTo(Appointment::class, 'id_appointment');
+        return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
     }
 }

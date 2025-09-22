@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PrescriptionTracking extends Model
+class Prescription extends Model
 {
     use HasFactory;
 
@@ -27,6 +27,6 @@ class PrescriptionTracking extends Model
 
     public function medicalRecord(): BelongsTo
     {
-        return $this->belongsTo(MedicalRecord::class, 'id_record');
+        return $this->belongsTo(MedicalRecord::class, 'id_record', 'id_record');
     }
 }

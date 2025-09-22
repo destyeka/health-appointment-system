@@ -13,7 +13,7 @@ class Payment extends Model
     protected $primaryKey = 'id_payment';
     
     protected $fillable = [
-        'appointment_id',
+        'id_appointment',
         'amount',
         'method',
         'status_payment',
@@ -22,6 +22,6 @@ class Payment extends Model
     
     public function appointment(): BelongsTo
     {
-        return $this->belongsTo(Appointment::class, 'appointment_id');
+        return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
     }
 }

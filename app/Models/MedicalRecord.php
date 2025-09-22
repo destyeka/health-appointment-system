@@ -14,7 +14,7 @@ class MedicalRecord extends Model
 
     protected $fillable = [
         'id_appointment',
-        'id_prescription',
+        'id_prescription', // cek
         'diagnosis',
         'treatment',
         'notes',
@@ -24,13 +24,13 @@ class MedicalRecord extends Model
     public function appointment()
     {
         // id_appointment foreign key di medical_records
-        return $this->belongsTo(Appointment::class, 'id_appointment');
+        return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
     }
 
     // Relasi ke Prescription
-    public function prescription()
+    public function prescriptions()
     {
         // id_prescription foreign key di medical_records
-        return $this->belongsTo(Prescription::class, 'id_prescription');
+        return $this->hasMany(Prescription::class, 'id_record', 'id_record');
     }
 }

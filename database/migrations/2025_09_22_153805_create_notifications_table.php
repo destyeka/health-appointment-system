@@ -8,13 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('notification', function (Blueprint $table) {
-            $table->string('notification_id')->primary();
-            // $table->string('appointment_id');
-            $table->string('status');
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->id('id_notification');
+
+            $table->foreignId('id_appointment')->constrained(table: 'appointments', column: 'id_appointment')->onDelete('cascade');
+
+            $table->string('status'); // isinya apa
             $table->text('message');
             $table->dateTime('sent_at');
-            
             $table->foreign('appointment_id')->references('appointment_id')->on('appointments');
         });
     }

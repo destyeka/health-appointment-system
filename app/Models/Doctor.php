@@ -7,15 +7,15 @@ use App\Models\Appointment;
 
 class Doctor extends Model
 {
-    protected $primaryKey = 'doctor_id';
-    public $incrementing = false;
-
     protected $fillable = [
-        'doctor_id', 'doctor_name', 'specialty'
+        'name', 
+        'specialty',
+        'phone',
+        'email'
     ];
 
-    public function appointments()
+    public function doctorSchedules()
     {
-        return $this->hasMany(Appointment::class, 'doctor_id', 'doctor_id');
+        return $this->hasMany(DoctorSchedule::class, 'id_doctor', 'id_doctor');
     }
 }

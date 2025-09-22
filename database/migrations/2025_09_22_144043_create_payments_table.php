@@ -11,11 +11,13 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id('id_payment');
-            // $table->foreignId('appointment_id')
-            //       ->constrained() 
-            //       ->onDelete('cascade'); 
+
+            $table->foreignId('id_appointment')
+                  ->constrained(table: 'appointments', column:'id_appointments') 
+                  ->onDelete('cascade');
+
             $table->decimal('amount', 10, 2); 
-            $table->string('method');
+            $table->string('method'); // enum?
             $table->enum('status_payment', ['unpaid', 'paid'])
                   ->default('unpaid');
             $table->timestamps();

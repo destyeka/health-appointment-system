@@ -9,20 +9,21 @@ class Notification extends Model
 {
     use HasFactory;
 
-    protected $table = 'notification';
-
     protected $fillable = [
-        'notification_id',
-        'appointment_id',
+        'id_appointment',
         'status',
         'message',
         'sent_at',
+    ];
+
+    protected $casts = [
+        'sent_at' => 'datetime'
     ];
 
     public $timestamps = false;
 
     public function appointment()
     {
-        return $this->belongsTo(Appointment::class, 'appointment_id');
+        return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
     }
 }

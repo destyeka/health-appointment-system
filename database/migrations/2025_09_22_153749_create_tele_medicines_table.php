@@ -8,15 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('telemedicine', function (Blueprint $table) {
-            $table->string('id_session')->primary();
-            // $table->string('id_appointment');
+        Schema::create('telemedicines', function (Blueprint $table) {
+            $table->id('id_session');
+
+            $table->foreignId('id_appointment')->constrained(table: 'appointments', column: 'id_appointment')->onDelete('cascade');
+
             $table->string('session_link');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->string('status');
-
-            $table->foreign('id_appointment')->references('id_appointment')->on('appointments');
+            $table->string('status'); // isinya apa
+            $table->timestamps();
         });
     }
 
