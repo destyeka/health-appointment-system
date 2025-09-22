@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PrescriptionTracking extends Model
 {
     use HasFactory;
-
-    protected $primaryKey = 'prescription_id';
+    protected $table = 'prescription_trackings';
+    protected $primaryKey = 'id_prescription';
 
     protected $fillable = [
         'id_record',

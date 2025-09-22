@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('telemedicine', function (Blueprint $table) {
+        Schema::create('telemedicines', function (Blueprint $table) {
             $table->string('id_session')->primary();
             $table->string('id_appointment');
             $table->string('session_link');
@@ -16,12 +16,13 @@ return new class extends Migration
             $table->dateTime('end_time');
             $table->string('status');
 
-            $table->foreign('id_appointment')->references('id_appointment')->on('appointments');
+            $table->foreignId('id_appointment')->constrained('appointments')->onDelete('cascade');
+
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('telemedicine');
+        Schema::dropIfExists('telemedicines');
     }
 };

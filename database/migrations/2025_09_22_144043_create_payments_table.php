@@ -11,9 +11,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id('id_payment');
-            // $table->foreignId('appointment_id')
-            //       ->constrained() 
-            //       ->onDelete('cascade'); 
+            $table->foreignId('appointment_id')->references('id_appointment')->on('appointments');
             $table->decimal('amount', 10, 2); 
             $table->string('method');
             $table->enum('status_payment', ['unpaid', 'paid'])
