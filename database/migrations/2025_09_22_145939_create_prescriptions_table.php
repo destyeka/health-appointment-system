@@ -8,9 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('prescription_trackings', function (Blueprint $table) {
+        Schema::create('prescriptions', function (Blueprint $table) {
             $table->id('id_prescription');
-            $table->foreignId('id_record')->constrained('medical_records')->onDelete('cascade');
+
+            $table->foreignId('id_record')
+                  ->constrained(table: 'medical_records', column: 'id_record')
+                  ->onDelete('cascade');
+
             $table->string('medication_name');
             $table->string('dosage');
             $table->string('frequency');

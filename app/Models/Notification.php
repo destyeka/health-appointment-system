@@ -8,19 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Notification extends Model
 {
     use HasFactory;
-    protected $primaryKey = 'id_notification';
+
     protected $fillable = [
-        'id_notification',
         'id_appointment',
         'status',
         'message',
         'sent_at',
     ];
 
+    protected $casts = [
+        'sent_at' => 'datetime'
+    ];
+
     public $timestamps = false;
 
-    public function appointment()
-    {
-        return $this->belongsTo(Appointment::class, 'id_appointment');
+    public function appointment() {
+        return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
     }
 }

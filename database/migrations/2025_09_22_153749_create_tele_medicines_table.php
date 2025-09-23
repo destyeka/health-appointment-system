@@ -9,15 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('telemedicines', function (Blueprint $table) {
-            $table->string('id_session')->primary();
-            // $table->string('id_appointment');
+            $table->id('id_session');
+
+            $table->foreignId('id_appointment')->constrained(table: 'appointments', column: 'id_appointment')->onDelete('cascade');
+
             $table->string('session_link');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->string('status');
-
-            $table->foreignId('id_appointment')->constrained('appointments')->onDelete('cascade');
-
+            $table->string('status'); // isinya apa
+            $table->timestamps();
         });
     }
 
