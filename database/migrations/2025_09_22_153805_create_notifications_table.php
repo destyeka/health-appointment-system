@@ -16,12 +16,11 @@ return new class extends Migration
             $table->string('status'); // isinya apa
             $table->text('message');
             $table->dateTime('sent_at');
-            $table->foreign('appointment_id')->references('appointment_id')->on('appointments');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('notification');
+        Schema::dropIfExists('notifications');
     }
 };

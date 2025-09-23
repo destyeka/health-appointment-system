@@ -22,8 +22,7 @@ class Notification extends Model
 
     public $timestamps = false;
 
-    public function appointment()
-    {
+    public function appointment() {
         return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
     }
 }

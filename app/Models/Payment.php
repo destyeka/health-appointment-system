@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Payment extends Model
 {
     use HasFactory;
-    
+    protected $table = 'payments';
     protected $primaryKey = 'id_payment';
     
     protected $fillable = [
@@ -19,7 +19,7 @@ class Payment extends Model
         'status_payment',
     ];
 
-    
+
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
