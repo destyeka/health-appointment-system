@@ -27,10 +27,4 @@ class MedicalRecord extends Model
         return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
     }
 
-    // Relasi ke Prescription
-    public function prescriptions()
-    {
-        // id_prescription foreign key di medical_records
-        return $this->hasMany(Prescription::class, 'id_record', 'id_record');
-    }
 }
