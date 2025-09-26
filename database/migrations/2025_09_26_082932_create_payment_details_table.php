@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('method', ['cash', 'credit_card', 'bank_transfer']); // revisi ntar
             $table->enum('payment_type', ['booking', 'repayment']);
             $table->enum('status_payment', ['unpaid', 'paid'])->default('unpaid');
+            // test
 
             $table->timestamps();
         });
