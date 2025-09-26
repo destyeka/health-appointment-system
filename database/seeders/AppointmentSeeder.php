@@ -3,10 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Appointment;
-use App\Models\Patient;
-use App\Models\Doctor;
-use Faker\Factory as Faker;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentSeeder extends Seeder
 {
@@ -15,22 +12,37 @@ class AppointmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = Faker::create();
-        $patientIds = Patient::pluck('patient_id');
-        $doctorIds = Doctor::pluck('doctor_id');
-
-        for ($i = 0; $i < 15; $i++) {
-            $appointmentTime = $faker->dateTimeBetween('now', '+1 month');
-
-            Appointment::create([
-                'patient_id' => $faker->randomElement($patientIds),
-                'doctor_id' => $faker->randomElement($doctorIds),
-                'date_of_appointment' => $appointmentTime->format('Y-m-d'),
-                'time_of_appointment' => $appointmentTime->format('H:i:s'),
-                'status' => $faker->randomElement(['scheduled', 'completed', 'canceled']),
+        DB::table('appointments')->insert([
+            [
+                'id_patient' => 5, // pastikan patient dengan id 1 ada
+                'id_doctor_schedule' => 1, // pastikan schedule dengan id 1 ada
+                'appointment_date' => '2025-10-01',
+                'appointment_time' => '09:00:00',
+                'status' => 'scheduled',
+                'consultation_type' => 'offline',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
-        }
+            ],
+            [
+                'id_patient' => 6,
+                'id_doctor_schedule' => 1,
+                'appointment_date' => '2025-10-02',
+                'appointment_time' => '13:00:00',
+                'status' => 'on_going',
+                'consultation_type' => 'online',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_patient' => 7,
+                'id_doctor_schedule' => 2,
+                'appointment_date' => '2025-10-05',
+                'appointment_time' => '10:30:00',
+                'status' => 'finished',
+                'consultation_type' => 'offline',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }
