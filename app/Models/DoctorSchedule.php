@@ -12,12 +12,14 @@ class DoctorSchedule extends Model
     protected $fillable = [
         'id_doctor',
         'day',
-        'time',
+        'start_time',
+        'end_time',
         'patient_slot'
     ];
 
     protected $casts = [
-        'time' => 'time',
+        'start_time' => 'time',
+        'end_time' => 'time',
         'patient_slot' => 'integer'
     ];
 
