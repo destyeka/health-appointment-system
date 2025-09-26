@@ -14,7 +14,7 @@ class PatientSeeder extends Seeder
     {
         DB::table('patients')->insert([
             [
-                'id_user' => 1, // pastikan user id 1 ada
+                'id_user' => 5,
                 'name' => 'Budi Santoso',
                 'gender' => 'Laki-laki',
                 'date_of_birth' => '1990-05-12',
@@ -25,7 +25,7 @@ class PatientSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 2,
+                'id_user' => 6,
                 'name' => 'Siti Aminah',
                 'gender' => 'Perempuan',
                 'date_of_birth' => '1985-09-23',
@@ -36,7 +36,7 @@ class PatientSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id_user' => 3,
+                'id_user' => 7,
                 'name' => 'Andi Prasetyo',
                 'gender' => 'Laki-laki',
                 'date_of_birth' => '2000-02-14',
