@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
 
         \App\Models\Role::truncate();
         \App\Models\Permission::truncate();
+        \App\Models\RolePermission::truncate();
         \App\Models\User::truncate();
         \App\Models\Doctor::truncate();
         \App\Models\DoctorSchedule::truncate();
@@ -35,6 +36,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             PermissionSeeder::class,
+            RolePermissionSeeder::class,
             UserSeeder::class,
             DoctorSeeder::class,
             DoctorScheduleSeeder::class,
@@ -46,7 +48,6 @@ class DatabaseSeeder extends Seeder
             PrescriptionSeeder::class,
             TelemedicineSeeder::class,
             NotificationSeeder::class,
-
         ]);
     }
 }
