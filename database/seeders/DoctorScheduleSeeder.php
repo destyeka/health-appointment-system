@@ -37,5 +37,10 @@ class DoctorScheduleSeeder extends Seeder
                 'patient_slot' => 5
             ],
         ];
+
+        foreach($schedules as $schedule)
+        {
+            DoctorSchedule::create($schedule);
+        };
     }
 }
