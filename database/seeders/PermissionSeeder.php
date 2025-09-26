@@ -25,15 +25,11 @@ class PermissionSeeder extends Seeder
             ],
             [
                 'permission_name' => 'view_medical_record',
-                'description' => 'melihat medical report',
-            ],
-            [
-                'permission_name' => 'view_medical_record',
                 'description' => 'melihat medical record',
             ],
             [
                 'permission_name' => 'make_medical_record',
-                'description' => 'membuat medical report',
+                'description' => 'membuat medical record',
             ],
             [
                 'permission_name' => 'view_perscription',

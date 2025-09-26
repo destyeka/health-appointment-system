@@ -13,10 +13,6 @@ class AppointmentSeeder extends Seeder
      */
     public function run(): void
     {
-        Schema::disableForeignKeyConstraints();
-        DB::table('appointments')->truncate();
-        Schema::enableForeignKeyConstraints();
-        
         DB::table('appointments')->insert([
             [
                 'id_patient' => 1, // pastikan patient dengan id 1 ada
