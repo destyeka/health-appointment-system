@@ -22,7 +22,17 @@ class UserSeeder extends Seeder
 
         // Doctor
         User::create([
-            'email' => 'doctor@example.com',
+            'email' => 'dr.budisantoso@mandalamedika.com',
+            'password' => Hash::make('doctor123'), 
+            'role' => 'doctor',
+        ]);
+        User::create([
+            'email' => 'dr.andipratama@mandalamedika.com',
+            'password' => Hash::make('doctor123'), 
+            'role' => 'doctor',
+        ]);
+        User::create([
+            'email' => 'dr.sitirahma@mandalamedika.com',
             'password' => Hash::make('doctor123'), 
             'role' => 'doctor',
         ]);

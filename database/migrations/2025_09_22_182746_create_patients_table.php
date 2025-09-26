@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('patients', function (Blueprint $table) {
             $table->id('id_patient');
 
+            $table->foreignId('id_user')->constrained(table: 'users', column: 'id_user');
+
             $table->string('name');
             $table->enum('gender', ['Laki-laki', 'Perempuan']);
             $table->date('date_of_birth');
