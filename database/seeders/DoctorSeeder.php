@@ -16,22 +16,22 @@ class DoctorSeeder extends Seeder
     {
         $doctors = [
             [
+                'id_user' => 2,
                 'name' => 'dr. Andi Pratama, Sp. JP',
                 'specialty' => 'Spesialis Jantung',
-                'phone' => '0812-3456-7890',
-                'email' => 'dr.andipratama@mandalamedika.com'
+                'phone' => '0812-3456-7890'
             ],
             [
+                'id_user' => 3,
                 'name' => 'dr. Siti Rahma, Sp. A',
                 'specialty' => 'Spesialis Anak',
-                'phone' => '0857-3344-5566',
-                'email' => 'dr.sitirahma@mandalamedika.com'
+                'phone' => '0857-3344-5566'
             ],
             [
+                'id_user' => 4,
                 'name' => 'dr. Budi Santoso, Sp. KK',
                 'specialty' => 'Spesialis Kulit & Kelamin',
-                'phone' => '0821-9876-5432',
-                'email' => 'dr.budisantoso@mandalamedika.com'
+                'phone' => '0821-9876-5432'
             ],
         ];
 

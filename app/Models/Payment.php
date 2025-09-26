@@ -14,14 +14,26 @@ class Payment extends Model
     
     protected $fillable = [
         'id_appointment',
-        'amount',
-        'method',
-        'status_payment',
+        'grand_total',
+        'booking_is_paid',
+        'repayment_is_paid',
+    ];
+
+    protected $casts = [
+        'grand_total' => 'decimal:2',
+        'booking_is_paid' => 'boolean',
+        'repayment_is_paid' => 'boolean'
     ];
 
 
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class, 'id_appointment', 'id_appointment');
+    }
+
+    public function paymentDetails() {
+        return $this->hasMany(
+            PaymentDetail::class
+        );
     }
 }

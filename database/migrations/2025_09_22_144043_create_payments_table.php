@@ -16,10 +16,10 @@ return new class extends Migration
                   ->constrained(table: 'appointments', column:'id_appointment') 
                   ->onDelete('cascade');
 
-            $table->decimal('amount', 10, 2); 
-            $table->string('method'); // enum?
-            $table->enum('status_payment', ['unpaid', 'paid'])
-                  ->default('unpaid');
+            $table->decimal('grand_total', 10, 2); 
+            $table->boolean('booking_is_paid')->default(false);
+            $table->boolean('repayment_is_paid')->default(false);
+
             $table->timestamps();
         });
     }
