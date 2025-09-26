@@ -17,7 +17,8 @@ return new class extends Migration
             $table->foreignId('id_doctor')->constrained(table: 'doctors', column: 'id_doctor')->onDelete('cascade');
 
             $table->string('day');
-            $table->string('time');
+            $table->time('start_time');
+            $table->time('end_time');
             $table->unsignedTinyInteger('patient_slot');
             $table->timestamps();
         });
