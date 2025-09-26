@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Doctor extends Model
 {
     protected $fillable = [
+        'id_user',
         'name', 
         'specialty',
         'phone',
-        'email'
     ];
 
     public function doctorSchedules()
