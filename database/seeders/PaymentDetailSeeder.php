@@ -6,6 +6,7 @@ use App\Models\PaymentDetail;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class PaymentDetailSeeder extends Seeder
 {
@@ -14,7 +15,6 @@ class PaymentDetailSeeder extends Seeder
      */
     public function run(): void
     {
-        // test
         $payment_details = [
             [
                 'id_payment' => 1,

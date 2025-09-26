@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->id('id_notification');
 
-            $table->foreignId('id_appointment')->constrained(table: 'appointments', column: 'id_appointment')->onDelete('cascade');
+            $table->foreignId('id_user')->constrained(table: 'users', column: 'id_user')->onDelete('cascade');
 
             $table->string('status'); // isinya apa
             $table->text('message');
