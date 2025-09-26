@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id('id_payment');
 
             $table->foreignId('id_appointment')
-                  ->constrained(table: 'appointments', column:'id_appointments') 
+                  ->constrained(table: 'appointments', column:'id_appointment') 
                   ->onDelete('cascade');
 
             $table->decimal('amount', 10, 2); 
