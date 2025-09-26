@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('doctors', function (Blueprint $table) {
             $table->id('id_doctor');
 
-            $table->foreignId('id_user')->constrained(table: 'users', column: 'id_user');
+            $table->foreignId('id_user')->constrained(table: 'users', column: 'id_user')->onDelete('cascade');
 
             $table->string('name');
             $table->string('specialty');

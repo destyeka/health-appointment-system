@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AppointmentSeeder extends Seeder
 {
@@ -12,9 +13,13 @@ class AppointmentSeeder extends Seeder
      */
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
+        DB::table('appointments')->truncate();
+        Schema::enableForeignKeyConstraints();
+        
         DB::table('appointments')->insert([
             [
-                'id_patient' => 5, // pastikan patient dengan id 1 ada
+                'id_patient' => 1, // pastikan patient dengan id 1 ada
                 'id_doctor_schedule' => 1, // pastikan schedule dengan id 1 ada
                 'appointment_date' => '2025-10-01',
                 'appointment_time' => '09:00:00',
@@ -24,7 +29,7 @@ class AppointmentSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id_patient' => 6,
+                'id_patient' => 2,
                 'id_doctor_schedule' => 1,
                 'appointment_date' => '2025-10-02',
                 'appointment_time' => '13:00:00',
@@ -34,7 +39,7 @@ class AppointmentSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id_patient' => 7,
+                'id_patient' => 3,
                 'id_doctor_schedule' => 2,
                 'appointment_date' => '2025-10-05',
                 'appointment_time' => '10:30:00',

@@ -6,6 +6,7 @@ use App\Models\DoctorSchedule;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class DoctorScheduleSeeder extends Seeder
 {

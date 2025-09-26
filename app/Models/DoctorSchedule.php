@@ -18,8 +18,8 @@ class DoctorSchedule extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'time',
-        'end_time' => 'time',
+        'start_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
         'patient_slot' => 'integer'
     ];
 
