@@ -18,8 +18,6 @@ return new class extends Migration
             $table->enum('gender', ['Laki-laki', 'Perempuan']);
             $table->date('date_of_birth');
             $table->string('phone')->unique();
-            $table->string('email')->unique();
-            $table->string('password');
             $table->text('address');
             $table->text('insurance_info')->nullable();
             $table->timestamps();
