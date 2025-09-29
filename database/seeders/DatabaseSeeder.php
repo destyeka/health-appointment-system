@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\Doctor::truncate();
         \App\Models\DoctorSchedule::truncate();
         \App\Models\Patient::truncate();
+        \App\Models\Admin::truncate();
         \App\Models\Appointment::truncate();
         \App\Models\Payment::truncate();
         \App\Models\PaymentDetail::truncate();
@@ -41,6 +42,7 @@ class DatabaseSeeder extends Seeder
             DoctorSeeder::class,
             DoctorScheduleSeeder::class,
             PatientSeeder::class,
+            AdminSeeder::class,
             AppointmentSeeder::class,
             PaymentSeeder::class,
             PaymentDetailSeeder::class,
