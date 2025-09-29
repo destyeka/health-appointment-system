@@ -9,7 +9,7 @@ class Telemedicine extends Model
 {
     use HasFactory;
 
-    protected $table = 'telemedicine';
+    protected $table = 'telemedicines';
 
     protected $fillable = [
         'id_appointment',

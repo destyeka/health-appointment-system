@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,10 +14,40 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
+        Schema::disableForeignKeyConstraints();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        \App\Models\Role::truncate();
+        \App\Models\Permission::truncate();
+        \App\Models\RolePermission::truncate();
+        \App\Models\User::truncate();
+        \App\Models\Doctor::truncate();
+        \App\Models\DoctorSchedule::truncate();
+        \App\Models\Patient::truncate();
+        \App\Models\Appointment::truncate();
+        \App\Models\Payment::truncate();
+        \App\Models\PaymentDetail::truncate();
+        \App\Models\MedicalRecord::truncate();
+        \App\Models\Prescription::truncate();
+        \App\Models\TeleMedicine::truncate();
+        \App\Models\Notification::truncate();
+
+        Schema::enableForeignKeyConstraints();
+
+        $this->call([
+            RoleSeeder::class,
+            PermissionSeeder::class,
+            RolePermissionSeeder::class,
+            UserSeeder::class,
+            DoctorSeeder::class,
+            DoctorScheduleSeeder::class,
+            PatientSeeder::class,
+            AppointmentSeeder::class,
+            PaymentSeeder::class,
+            PaymentDetailSeeder::class,
+            MedicalRecordSeeder::class,
+            PrescriptionSeeder::class,
+            TelemedicineSeeder::class,
+            NotificationSeeder::class,
         ]);
 
         $this->call(PrescriptionSeeder::class);
