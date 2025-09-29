@@ -18,7 +18,7 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         @auth
-                            <span class="text-gray-700">Hello, {{ Auth::user()->name }}</span>
+                            <span class="text-gray-700">Hello, {{ Auth::user()->id_user }}</span>
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
                                 <button type="submit" class="text-red-600 hover:text-red-900">Logout</button>
