@@ -51,5 +51,8 @@ class DatabaseSeeder extends Seeder
             TelemedicineSeeder::class,
             NotificationSeeder::class,
         ]);
+
+        $this->call(PrescriptionSeeder::class);
+        $this->call(PaymentSeeder::class);
     }
 }
