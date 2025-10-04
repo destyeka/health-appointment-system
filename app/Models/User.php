@@ -42,4 +42,18 @@ class User extends Authenticatable
     {
         return $this->hasMany(Doctor::class, 'id_user', 'id_user');
     }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'id_role', 'id_role');
+    }
+
+    /**
+     * Cek apakah user punya permission tertentu
+     */
+    public function hasPermission(string $permission): bool
+    {
+        return $this->role 
+            && $this->role->permissions()->where('permission_name', $permission)->exists();
+    }
 }

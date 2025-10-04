@@ -16,6 +16,12 @@ class Role extends Model
         'description',
     ];
 
+    // FIX: Route model binding pakai 'id_role' sebagai key untuk parameter {role}
+    public function getRouteKeyName()
+    {
+        return 'id_role';
+    }
+
     public function users()
     {
         return $this->hasMany(User::class, 'id_role', 'id_role');
@@ -24,5 +30,10 @@ class Role extends Model
     public function permissions()
     {
         return $this->belongsToMany(Permission::class, 'role_permissions', 'id_role', 'id_permission');
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->permissions()->where('name', $permission)->exists();
     }
 }

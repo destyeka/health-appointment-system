@@ -9,10 +9,16 @@ class Permission extends Model
 {
     use HasFactory;
 
+    protected $table = 'permissions';
+    protected $primaryKey = 'id_permission';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     protected $fillable = [
         'permission_name',
-        'description'
+        'description',
     ];
+
 
     public function roles()
     {
