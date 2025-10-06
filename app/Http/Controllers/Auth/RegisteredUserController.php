@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\OTP; // <-- Tambahkan model OTP
+use App\Mail\SendOTPMail; // <-- Tambahkan Mailable OTP
 use App\Providers\AppServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Mail;
 
 class RegisteredUserController extends Controller
 {
@@ -33,20 +36,24 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'role' => ['required', 'in:Doctor,Patient'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
-        $role = Role::where('role_name', $request->role)->first();
+
+        // ambil role Patient langsung dari tabel roles
+        $role = Role::where('role_name', 'Patient')->first();
+
         $user = User::create([
             'email' => $request->email,
-            'id_role' => $role->id_role,
+            'id_role' => $role->id_role, // langsung Patient
             'password' => Hash::make($request->password),
         ]);
+
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // redirect ke halaman isi data patient
+        return redirect()->route('patient.create')->with('success', 'Registrasi berhasil. Silakan lengkapi data pasien Anda.');
     }
 }
