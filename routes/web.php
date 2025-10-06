@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\RoleController;
-
+use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('user-roles', RoleController::class);
+Route::resource('doctors', DoctorController::class);
 // Route::resource('user-roles', RoleController::class)->parameters([
 //     'user-roles' => 'role'  
 // ]);
