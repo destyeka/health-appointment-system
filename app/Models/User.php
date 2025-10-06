@@ -38,9 +38,9 @@ class User extends Authenticatable
         return $this->hasMany(Patient::class, 'id_user', 'id_user');
     }
 
-    public function doctors()
+    public function doctor()
     {
-        return $this->hasMany(Doctor::class, 'id_user', 'id_user');
+        return $this->hasOne(Doctor::class, 'id_user', 'id_user');
     }
 
     public function role()

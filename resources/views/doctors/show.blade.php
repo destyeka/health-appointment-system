@@ -6,25 +6,25 @@
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                        Role: {{ $user_role->role_name ?? 'N/A' }}
+                        Name: {{ $doctor->name ?? 'N/A' }}
                     </h2>
                     <p class="text-sm text-gray-600 mt-1">
-                        ID: {{ $user_role->id_role ?? 'N/A' }} | Dibuat: {{ $user_role->created_at?->format('d/m/Y H:i') ?? 'N/A' }}
+                        Doctor ID: {{ $doctor->id_doctor ?? 'N/A' }} | Registered at: {{ $doctor->created_at?->format('d/m/Y H:i') ?? 'N/A' }}
                     </p>
                 </div>
                 <div class="flex space-x-3">
-                    <a href="{{ route('user-roles.edit', $user_role) }}" 
+                    <a href="{{ route('doctors.edit', $doctor) }}" 
                        class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                        Edit Role
+                        Edit Doctor
                     </a>
-                    <form action="{{ route('user-roles.destroy', $user_role) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this role?')">
+                    <form action="{{ route('doctors.destroy', $doctor) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this doctor?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                            Delete Role
+                            Delete Doctor
                         </button>
                     </form>
-                    <a href="{{ route('user-roles.index') }}" 
+                    <a href="{{ route('doctors.index') }}" 
                        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
                         Back to List
                     </a>
@@ -46,33 +46,33 @@
             {{-- Card untuk detail role --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Detail Role</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Detail Doctor</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Role Name</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $user_role->role_name ?? 'N/A' }}</p>
+                            <label class="block text-sm font-medium text-gray-700">Specialty</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $doctor->specialty ?? 'N/A' }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Total Users</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ ($user_role->users ?? collect())->count() }}</p>
+                            <label class="block text-sm font-medium text-gray-700">Phone</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $doctor->phone }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Total Permissions</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ ($user_role->permissions ?? collect())->count() }}</p>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $doctor_email }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Updated At</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $user_role->updated_at?->format('d/m/Y H:i') ?? 'N/A' }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ $doctor->updated_at?->format('d/m/Y H:i') ?? 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {{-- Section Users --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            {{-- <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Users with this Role ({{ ($user_role->users ?? collect())->count() }})</h3>
-                    @if(($user_role->users ?? collect())->count() > 0)
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Users with this Role ({{ ($doctor->users ?? collect())->count() }})</h3>
+                    @if(($doctor->users ?? collect())->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -83,10 +83,10 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($user_role->users ?? collect() as $user)
+                                    @foreach($doctor->users ?? collect() as $user)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $user_role->role_name ?? 'N/A' }}
+                                                {{ $doctor->role_name ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $user->email ?? 'N/A' }}
@@ -106,13 +106,13 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </div> --}}
 
             {{-- Section Permissions --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            {{-- <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Permissions for this Role ({{ ($user_role->permissions ?? collect())->count() }})</h3>
-                    @if(($user_role->permissions ?? collect())->count() > 0)
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Permissions for this Role ({{ ($doctor->permissions ?? collect())->count() }})</h3>
+                    @if(($doctor->permissions ?? collect())->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -123,7 +123,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($user_role->permissions ?? collect() as $permission)
+                                    @foreach($doctor->permissions ?? collect() as $permission)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {{ $permission->permission_name ?? 'N/A' }}
@@ -146,7 +146,7 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 </x-app-layout>

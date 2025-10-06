@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Doctor extends Model
 {
     use HasFactory;
+
+    protected $primaryKey = 'id_doctor';
     protected $fillable = [
         'id_user',
         'name', 
