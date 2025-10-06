@@ -86,7 +86,7 @@
                                     @foreach($user_role->users ?? collect() as $user)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $user->name ?? 'N/A' }}
+                                                {{ $user_role->role_name ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $user->email ?? 'N/A' }}
@@ -126,7 +126,7 @@
                                     @foreach($user_role->permissions ?? collect() as $permission)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $permission->name ?? 'N/A' }}
+                                                {{ $permission->permission_name ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $permission->description ?? 'No description' }}
