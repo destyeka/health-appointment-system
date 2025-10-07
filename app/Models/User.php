@@ -33,9 +33,9 @@ class User extends Authenticatable
 
     protected $primaryKey = 'id_user';
 
-    public function patients()
+    public function patient()
     {
-        return $this->hasMany(Patient::class, 'id_user', 'id_user');
+        return $this->hasOne(Patient::class, 'id_user', 'id_user');
     }
 
     public function doctor()
