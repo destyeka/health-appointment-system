@@ -176,4 +176,3 @@ class DoctorController extends Controller
         return response()->json($doctors);
     }
 }
-
