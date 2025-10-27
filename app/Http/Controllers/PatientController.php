@@ -78,7 +78,9 @@ class PatientController extends Controller
             $query->where('role_name', 'Patient');
         })->whereDoesntHave('patient')->get(['id_user', 'email']);
 
-        return view('patients.edit', compact('patient', 'patient_email', 'avalable_users'));
+        $genders = ['Laki-laki', 'Perempuan'];
+
+        return view('patients.edit', compact('patient', 'patient_email', 'available_users', 'genders'));
     }
 
     /**
@@ -112,6 +114,6 @@ class PatientController extends Controller
     public function destroy(Patient $patient)
     {
         $patient->delete();
-        return redirect()->route('patients.index')->with('success', 'Patient updated successfully!');
+        return redirect()->route('patients.index')->with('success', 'Patient deleted successfully!');
     }
 }

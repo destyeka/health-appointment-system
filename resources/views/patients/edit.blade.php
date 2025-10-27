@@ -21,7 +21,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('patients.update') }}" method="POST">
+                    <form action="{{ route('patients.update', $patient) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -31,7 +31,7 @@
                             <select name="id_user" id="id_user"
                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                    >
-                                   <option value="">-- Choose a user --</option>
+                                   <option value="{{ $patient->id_patient }}">{{ $patient->user->email }}</option>
                                    @foreach ($available_users as $user)
                                        <option value="{{ $user->id_user }}">
                                         {{ $user->email }}
@@ -43,7 +43,7 @@
                         {{-- Patient Name --}}
                         <div class="mb-4">
                             <label for="name" class="block text-gray-700 font-bold mb-2">Patient Name:</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}"
+                            <input type="text" name="name" id="name" value="{{ $patient->name }}"
                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                    placeholder="Enter patient name">
                         </div>
@@ -54,7 +54,7 @@
                             <select name="gender" id="gender"
                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                    >
-                                   <option value="">-- Choose a gender --</option>
+                                   <option value="{{ $patient->gender }}">{{ $patient->gender }}</option>
                                    @foreach ($genders as $gender)
                                        <option value="{{ $gender }}">
                                         {{ $gender }}
@@ -66,7 +66,7 @@
                         {{-- Doctor Specialty --}}
                         <div class="mb-4">
                             <label for="date_of_birth" class="block text-gray-700 font-bold mb-2">Date of Birth:</label>
-                            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth') }}"
+                            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', optional($patient->date_of_birth)->format('Y-m-d')) }}"
                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                    placeholder="Enter patient date of birth">
                         </div>
@@ -74,7 +74,7 @@
                         {{-- Doctor Phone --}}
                         <div class="mb-4">
                             <label for="phone" class="block text-gray-700 font-bold mb-2">Phone Number:</label>
-                            <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
+                            <input type="text" name="phone" id="phone" value="{{ $patient->phone }}"
                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                    placeholder="Enter patient phone">
                         </div>
@@ -83,13 +83,13 @@
                             <label for="address" class="block text-gray-700 font-bold mb-2">Address:</label>
                             <textarea name="address" id="address" rows="3"
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter address">{{ old('address') }}</textarea>
+                            placeholder="Enter address">{{ $patient->address }}</textarea>
                         </div>
 
                         {{-- Doctor Phone --}}
                         <div class="mb-4">
                             <label for="insurance_info" class="block text-gray-700 font-bold mb-2">Insurance Info:</label>
-                            <input type="text" name="insurance_info" id="insurance_info" value="{{ old('insurance_info') }}"
+                            <input type="text" name="insurance_info" id="insurance_info" value="{{ $patient->insurance_info }}"
                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                    placeholder="Enter patient insurance_info">
                         </div>
@@ -100,7 +100,7 @@
                                 Cancel
                             </a>
                             <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Create Doctor
+                                Update Patient
                             </button>
                         </div>
 
