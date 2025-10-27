@@ -12,7 +12,7 @@ class PatientController extends Controller
     // Tampilkan form isi data patient
     public function create()
     {
-        return view('auth.patient-create'); // nanti kita buat viewnya
+        return view('auth.patient-create');
     }
 
     // Simpan data patient
@@ -41,5 +41,18 @@ class PatientController extends Controller
         ]);
 
         return redirect()->route('dashboard')->with('success', 'Data pasien berhasil disimpan.');
+    }
+
+    // 🔹 Tampilkan profil patient yang sedang login
+    public function show()
+    {
+        $user = Auth::user();
+        $patient = Patient::where('id_user', $user->id_user)->first();
+
+        if (!$patient) {
+            return redirect()->route('patient.create')->with('warning', 'Silakan lengkapi data pasien terlebih dahulu.');
+        }
+
+        return view('profile.patient', compact('user', 'patient'));
     }
 }

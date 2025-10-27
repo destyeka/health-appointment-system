@@ -73,6 +73,11 @@ Route::middleware('auth')->group(function () {
     // Mengarah ke fungsi searchApi yang kita buat
     Route::get('/doctors-search-api', [DoctorController::class, 'searchApi'])
          ->name('doctors.api.search');
+
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    
+
 });
 
 
