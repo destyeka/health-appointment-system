@@ -36,7 +36,7 @@ class AppointmentSeeder extends Seeder
             ],
             [
                 'id_patient' => 3,
-                'id_doctor_schedule' => 2,
+                'id_doctor_schedule' => 1,
                 'appointment_date' => '2025-10-05',
                 'appointment_time' => '10:30:00',
                 'status' => 'finished',

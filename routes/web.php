@@ -1,11 +1,18 @@
 <?php
 
+use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\DoctorScheduleController;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,8 +57,7 @@ Route::middleware('auth')->group(function () {
     // == RUTE UNTUK ADMIN (CRUD) ==
     // Rute resource ini harus di dalam middleware 'auth'
     Route::resource('user-roles', RoleController::class);
-    Route::resource('doctors', DoctorController::class);
-    Route::resource('permissions', PermissionController::class);
+        Route::resource('permissions', PermissionController::class);
     // Catatan: Route::resource('doctors', ...) sudah membuat semua rute
     // doctors.index, doctors.create, doctors.store, dll.
     // yang digunakan oleh file DoctorController Anda.
@@ -71,9 +77,21 @@ Route::middleware('auth')->group(function () {
 
 
 // Route::resource('user-roles', RoleController::class)->parameters([
+    //     'user-roles' => 'role'  
+    // ]);
+    
+Route::resource('doctors', DoctorController::class);
+Route::resource('doctor-schedules', DoctorScheduleController::class);
+Route::resource('patients', PatientController::class);
+Route::resource('medical-records', MedicalRecordController::class);
+Route::resource('prescriptions', PrescriptionController::class);
+Route::resource('payments', PaymentController::class);
+Route::resource('permissions', PermissionController::class);
 //     'user-roles' => 'role'  
 // ]);
 
+
+Route::post('/webhook/payment', [WebhookController::class, 'handlePayment'])->name('webhook.payment')->withoutMiddleware([VerifyCsrfToken::class]);
 
 require __DIR__.'/auth.php';
 

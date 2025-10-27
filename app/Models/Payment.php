@@ -33,7 +33,7 @@ class Payment extends Model
 
     public function paymentDetails() {
         return $this->hasMany(
-            PaymentDetail::class
+            PaymentDetail::class, 'id_payment', 'id_payment'
         );
     }
 }
