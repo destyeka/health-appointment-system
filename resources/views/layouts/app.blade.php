@@ -17,8 +17,20 @@
                         <a href="{{ route('dashboard') }}" class="text-xl font-semibold">Health Appointment</a>
                     </div>
                     <div class="flex items-center space-x-4">
+                        @php
+                            $user = Auth::user();
+                        @endphp
                         @auth
                             <span class="text-gray-700">Hello, {{ Auth::user()->id_user }}</span>
+
+                                @if ($user->id_role == 1)
+                                    <a href="{{ route('profile.show') }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                                @elseif ($user->id_role == 2)
+                                    <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                                @elseif ($user->id_role == 3)
+                                    <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                                @endif
+                                
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
                                 <button type="submit" class="text-red-600 hover:text-red-900">Logout</button>
