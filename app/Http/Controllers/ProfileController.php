@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Admin;
 use Illuminate\View\View;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
@@ -21,15 +22,13 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if ($user->id_role == 1) {
-            // Admin
-            return view('profile.admin', compact('user'));
+            $admin = Admin::where('id_user', $user->id_user)->first();
+            return view('profile.admin', compact('user', 'admin'));
         } elseif ($user->id_role == 2) {
-            // Doctor
-            $doctor = Doctor::where('id_user', $user->id_role)->first();
+            $doctor = Doctor::where('id_user', $user->id_user)->first();
             return view('profile.doctor', compact('user', 'doctor'));
         } elseif ($user->id_role == 3) {
-            // Patient
-            $patient = Patient::where('id_user', $user->id_role)->first();
+            $patient = Patient::where('id_user', $user->id_user )->first();
             return view('profile.patient', compact('user', 'patient'));
         } else {
             abort(403, 'Role tidak dikenali.');
