@@ -64,10 +64,23 @@
                 <div class="p-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Pick a Schedule</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach ($next7Days as $day)
+                        @php
+                        // Filter hari yang punya jadwal
+                        $daysWithSchedule = $next7Days->filter(function ($day) use ($doctor_schedules) {
+                        $dayName = $day->locale('id')->translatedFormat('l');
+                        return $doctor_schedules->firstWhere('day', $dayName);
+                        });
+                        @endphp
+
+                        @forelse ($daysWithSchedule as $day)
                         @php
                         $dayName = $day->locale('id')->translatedFormat('l');
                         $schedule = $doctor_schedules->firstWhere('day', $dayName);
+
+                        $start = \Carbon\Carbon::parse($schedule->start_time);
+                        $end = \Carbon\Carbon::parse($schedule->end_time);
+                        $totalMinutes = $start->diffInMinutes($end);
+                        $slotDuration = $totalMinutes / $schedule->patient_slot;
                         @endphp
 
                         <div
@@ -78,14 +91,6 @@
                                         {{ ucfirst($day->translatedFormat('l, d M Y')) }}
                                     </h3>
                                 </div>
-
-                                @if ($schedule)
-                                @php
-                                $start = \Carbon\Carbon::parse($schedule->start_time);
-                                $end = \Carbon\Carbon::parse($schedule->end_time);
-                                $totalMinutes = $start->diffInMinutes($end);
-                                $slotDuration = $totalMinutes / $schedule->patient_slot;
-                                @endphp
 
                                 <ul class="divide-y divide-gray-100">
                                     @for ($i = 0; $i < $schedule->patient_slot; $i++)
@@ -117,36 +122,47 @@
                                                 Booked
                                             </span>
                                             @else
-                                            <form action="{{ route('appointments.store') }}" method="POST">
+                                            <form action="{{ route('appointments.temp') }}" method="POST">
                                                 @csrf
+                                                <input type="hidden" name="id_patient"
+                                                    value="{{ Auth::user()->patient->id_patient ?? '' }}">
+                                                <input type="hidden" name="patient_name"
+                                                    value="{{ Auth::user()->patient->name ?? '' }}">
                                                 <input type="hidden" name="id_doctor_schedule"
                                                     value="{{ $schedule->id_doctor_schedule }}">
-                                                <input type="hidden" name="date" value="{{ $day->toDateString() }}">
-                                                <input type="hidden" name="start_time"
+                                                <input type="hidden" name="appointment_date"
+                                                    value="{{ $day->toDateString() }}">
+                                                <input type="hidden" name="appointment_time"
                                                     value="{{ $slotStart->format('H:i') }}">
-                                                <input type="hidden" name="end_time"
-                                                    value="{{ $slotEnd->format('H:i') }}">
-                                                <button type="submit"
-                                                    class="inline-flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1.5 rounded-md transition">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M12 4v16m8-8H4" />
-                                                    </svg>
-                                                    Book
-                                                </button>
+                                                <input type="hidden" name="doctor_name"
+                                                    value="{{ $schedule->doctor->name }}">
+                                                <input type="hidden" name="specialty"
+                                                    value="{{ $schedule->doctor->specialty }}">
+
+                                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                                    <select name="consultation_type"
+                                                        class="border border-gray-300 rounded-md text-xs py-1.5 px-2 focus:ring-2 focus:ring-green-400 focus:outline-none">
+                                                        <option value="offline">Offline</option>
+                                                        <option value="online">Online</option>
+                                                    </select>
+
+                                                    <button type="submit"
+                                                        class="inline-flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1.5 rounded-md transition">
+                                                        Buat Janji
+                                                    </button>
+                                                </div>
                                             </form>
                                             @endif
                                         </li>
                                         @endfor
                                 </ul>
-                                @else
-                                <p class="text-gray-500 italic mt-2">Tidak ada jadwal dokter hari ini</p>
-                                @endif
                             </div>
                         </div>
-                        @endforeach
+                        @empty
+                        <p class="text-gray-500 italic mt-2">Dokter ini tidak memiliki jadwal dalam 7 hari ke depan.</p>
+                        @endforelse
                     </div>
+
 
                 </div>
             </div>

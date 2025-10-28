@@ -89,6 +89,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('permissions', PermissionController::class);
 
     Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
+    Route::get('/appointment/confirmation', [AppointmentController::class, 'confirm'])->name('appointments.confirmation');
+    Route::post('/appointments/temp', [AppointmentController::class, 'temp'])->name('appointments.temp');
 
 });
 

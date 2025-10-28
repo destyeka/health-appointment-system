@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Doctor;
+use App\Models\DoctorSchedule;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -56,8 +57,32 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.index')->with('success', 'Janji temu berhasil dijadwalkan!');
     }
 
-    public function bookAppointment(Request $request, Patient $patient, Doctor $doctor)
+    public function temp(Request $request)
     {
-        
+        $schedule = DoctorSchedule::with('doctor')->find($request->id_doctor_schedule);
+
+        if (!$schedule || !$schedule->doctor) {
+            return redirect()->back()->with('error', 'Data dokter tidak ditemukan.');
+        }
+
+        $appointmentData = [
+            'id_patient' => $request->id_patient,
+            'patient_name' => $request->patient_name,
+            'id_doctor_schedule' => $schedule->id_doctor_schedule,
+            'doctor_name' => $schedule->doctor->name,
+            'specialty' => $schedule->doctor->specialty,
+            'appointment_date' => $request->appointment_date,
+            'appointment_time' => $request->appointment_time,
+            'consultation_type' => $request->consultation_type,
+        ];
+
+        session(['appointment' => $appointmentData]);
+
+        return redirect()->route('appointments.confirmation');
+    }
+
+    public function confirm(Request $request)
+    {
+        return view('appointments.confirmation');
     }
 }
