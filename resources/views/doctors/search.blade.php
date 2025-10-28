@@ -11,9 +11,8 @@
                 <div class="p-6 bg-white border-b border-gray-200">
 
                     <!-- 1. Search Bar (Filter Nama/Spesialis) -->
-                    <input type="text" id="doctor-search-input"
-                           placeholder="Ketik nama atau spesialisasi dokter..."
-                           class="form-input rounded-md shadow-sm mt-1 block w-full">
+                    <input type="text" id="doctor-search-input" placeholder="Ketik nama atau spesialisasi dokter..."
+                        class="form-input rounded-md shadow-sm mt-1 block w-full">
 
                     <!-- 2. Filter Hari (BARU) -->
                     <select id="doctor-day-filter" class="form-select rounded-md shadow-sm mt-4 block w-full">
@@ -107,6 +106,10 @@
                                 
                                 <h4 class="font-semibold text-md mt-3 border-t pt-2">Jadwal:</h4>
                                 ${scheduleHtml}
+                                <a href="/doctor/${doctor.id_doctor}/book" 
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Book Appointment
+                                </a>
                             </div>
                         `;
                         resultsContainer.innerHTML += doctorCard;

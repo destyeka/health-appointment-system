@@ -7,6 +7,7 @@ use App\Http\Controllers\DoctorScheduleController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\WebhookController;
@@ -30,7 +31,7 @@ Route::get('/dashboard', function () {
     if ($user->role->role_name == 'Admin') {
 
         // Arahkan Admin ke halaman CRUD (misalnya, daftar dokter)
-        return redirect()->route('doctors.index'); 
+        return view('dashboard'); 
 
     } else if ($user->role->role_name == 'Doctor') {
 
@@ -57,7 +58,7 @@ Route::middleware('auth')->group(function () {
     // == RUTE UNTUK ADMIN (CRUD) ==
     // Rute resource ini harus di dalam middleware 'auth'
     Route::resource('user-roles', RoleController::class);
-        Route::resource('permissions', PermissionController::class);
+    Route::resource('permissions', PermissionController::class);
     // Catatan: Route::resource('doctors', ...) sudah membuat semua rute
     // doctors.index, doctors.create, doctors.store, dll.
     // yang digunakan oleh file DoctorController Anda.
@@ -78,6 +79,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     
 
+    Route::resource('doctors', DoctorController::class);
+    Route::resource('doctor-schedules', DoctorScheduleController::class);
+    Route::resource('patients', PatientController::class);
+    Route::resource('medical-records', MedicalRecordController::class);
+    Route::resource('prescriptions', PrescriptionController::class);
+    Route::resource('payments', PaymentController::class);
+    Route::resource('appointments', AppointmentController::class);
+    Route::resource('permissions', PermissionController::class);
+
+    Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
+
 });
 
 
@@ -85,13 +97,6 @@ Route::middleware('auth')->group(function () {
     //     'user-roles' => 'role'  
     // ]);
     
-Route::resource('doctors', DoctorController::class);
-Route::resource('doctor-schedules', DoctorScheduleController::class);
-Route::resource('patients', PatientController::class);
-Route::resource('medical-records', MedicalRecordController::class);
-Route::resource('prescriptions', PrescriptionController::class);
-Route::resource('payments', PaymentController::class);
-Route::resource('permissions', PermissionController::class);
 //     'user-roles' => 'role'  
 // ]);
 

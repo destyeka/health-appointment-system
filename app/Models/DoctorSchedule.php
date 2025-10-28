@@ -23,16 +23,27 @@ class DoctorSchedule extends Model
      * Kolom yang diizinkan untuk diisi.
      */
     protected $fillable = [
-        'id_doctor', 
-        'day', 
-        'start_time', 
-        'end_time', 
+        'id_doctor',
+        'day',
+        'start_time',
+        'end_time',
         'patient_slot'
     ];
+
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
+
 
     /**
      * Menentukan apakah model harus mencatat timestamps (created_at, updated_at).
      * Tabel Anda tidak memilikinya, jadi kita set ke false.
      */
     public $timestamps = false;
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class, 'id_doctor', 'id_doctor');
+    }
 }
