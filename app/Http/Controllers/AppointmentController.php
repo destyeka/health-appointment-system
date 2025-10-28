@@ -55,4 +55,9 @@ class AppointmentController extends Controller
 
         return redirect()->route('appointments.index')->with('success', 'Janji temu berhasil dijadwalkan!');
     }
+
+    public function bookAppointment(Request $request, $patient, $doctor)
+    {
+        
+    }
 }

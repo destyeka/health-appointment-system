@@ -57,7 +57,7 @@ Route::middleware('auth')->group(function () {
     // == RUTE UNTUK ADMIN (CRUD) ==
     // Rute resource ini harus di dalam middleware 'auth'
     Route::resource('user-roles', RoleController::class);
-        Route::resource('permissions', PermissionController::class);
+    Route::resource('permissions', PermissionController::class);
     // Catatan: Route::resource('doctors', ...) sudah membuat semua rute
     // doctors.index, doctors.create, doctors.store, dll.
     // yang digunakan oleh file DoctorController Anda.
@@ -78,6 +78,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     
 
+    Route::resource('doctors', DoctorController::class);
+    Route::resource('doctor-schedules', DoctorScheduleController::class);
+    Route::resource('patients', PatientController::class);
+    Route::resource('medical-records', MedicalRecordController::class);
+    Route::resource('prescriptions', PrescriptionController::class);
+    Route::resource('payments', PaymentController::class);
+    Route::resource('permissions', PermissionController::class);
+    
 });
 
 
@@ -85,13 +93,6 @@ Route::middleware('auth')->group(function () {
     //     'user-roles' => 'role'  
     // ]);
     
-Route::resource('doctors', DoctorController::class);
-Route::resource('doctor-schedules', DoctorScheduleController::class);
-Route::resource('patients', PatientController::class);
-Route::resource('medical-records', MedicalRecordController::class);
-Route::resource('prescriptions', PrescriptionController::class);
-Route::resource('payments', PaymentController::class);
-Route::resource('permissions', PermissionController::class);
 //     'user-roles' => 'role'  
 // ]);
 
