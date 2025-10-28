@@ -24,7 +24,7 @@ class DoctorScheduleController extends Controller
      */
     public function create()
     {
-        $doctors = Doctor::whereHas('doctorSchedules')
+        $doctors = Doctor::whereHas('schedules')
             ->get(['name', 'id_doctor']);
         return view('schedules.create', compact('doctors'));
     }
@@ -76,7 +76,7 @@ class DoctorScheduleController extends Controller
      */
     public function edit(DoctorSchedule $doctor_schedule)
     {
-        $doctors = Doctor::whereHas('doctorSchedules')
+        $doctors = Doctor::whereHas('schedules')
             ->get(['name', 'id_doctor']);
         return view('schedules.edit', compact('doctor_schedule', 'doctors'));
     }
@@ -126,4 +126,5 @@ class DoctorScheduleController extends Controller
 
         return redirect()->route('doctor-schedules.index')->with('success', 'Schedule deleted sucessfully!');
     }
+
 }

@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Doctor;
+use App\Models\DoctorSchedule;
+use App\Models\Appointment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+
+use Carbon\Carbon;
 
 class DoctorController extends Controller
 {
@@ -148,7 +152,7 @@ class DoctorController extends Controller
         if ($searchQuery) {
             $doctorsQuery->where(function ($q) use ($searchQuery) {
                 $q->where('name', 'LIKE', "%{$searchQuery}%")
-                  ->orWhere('specialty', 'LIKE', "%{$searchQuery}%");
+                    ->orWhere('specialty', 'LIKE', "%{$searchQuery}%");
             });
         }
 
@@ -162,17 +166,40 @@ class DoctorController extends Controller
         }
 
         // 5. Ambil data dokter, DAN juga data jadwalnya (Eager Loading)
-        $doctorsQuery->with(['schedules' => function($query) use ($searchDay) {
-            // Jika user memfilter hari, kita HANYA ambil jadwal di hari itu.
-            if ($searchDay) {
-                $query->where('day', $searchDay);
+        $doctorsQuery->with([
+            'schedules' => function ($query) use ($searchDay) {
+                // Jika user memfilter hari, kita HANYA ambil jadwal di hari itu.
+                if ($searchDay) {
+                    $query->where('day', $searchDay);
+                }
+                // Jika tidak, kita ambil semua jadwal dokter tsb.
             }
-            // Jika tidak, kita ambil semua jadwal dokter tsb.
-        }]);
-        
+        ]);
+
         $doctors = $doctorsQuery->get();
 
         // 6. Kembalikan data sebagai JSON
         return response()->json($doctors);
     }
+
+    public function bookDoctor(Doctor $doctor)
+    {
+        $today = now();
+        Carbon::setLocale('id');
+
+        $next7Days = collect();
+        for ($i = 0; $i < 7; $i++) {
+            $next7Days->push(Carbon::now()->addDays($i));
+        }
+
+        $doctor_schedules = DoctorSchedule::where('id_doctor', $doctor->id_doctor)
+            ->with('doctor')
+            ->get();
+
+        $appointments = Appointment::whereIn('id_doctor_schedule', $doctor_schedules->pluck('id_doctor_schedule'))
+            ->get();
+
+        return view('doctors.patient.booking', compact('doctor', 'doctor_schedules', 'appointments', 'next7Days'));
+    }
+
 }
