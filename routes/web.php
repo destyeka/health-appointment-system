@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -34,10 +36,8 @@ Route::get('/dashboard', function () {
         return view('dashboard'); 
 
     } else if ($user->role->role_name == 'Doctor') {
-
-        // TODO: Arahkan Dokter ke halaman jadwal mereka
-        // (Untuk sekarang, biarkan di dashboard)
-        return view('dashboard'); 
+        // Arahkan dokter ke halaman appointments mereka
+        return redirect()->route('appointments.index');
 
     } else if ($user->role->role_name == 'Patient') {
 
@@ -88,9 +88,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('appointments', AppointmentController::class);
     Route::resource('permissions', PermissionController::class);
 
+    Route::get('/book/{schedule}', [App\Http\Controllers\AppointmentController::class, 'bookForm'])
+        ->name('appointments.book')->middleware('auth');
+
+// Route untuk menyimpan booking appointment
+    Route::post('/appointments/store', [AppointmentController::class, 'store'])->name('appointments.store');
+
+
     Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
-    Route::get('/appointment/confirmation', [AppointmentController::class, 'confirm'])->name('appointments.confirmation');
-    Route::post('/appointments/temp', [AppointmentController::class, 'temp'])->name('appointments.temp');
 
 });
 
