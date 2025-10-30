@@ -11,13 +11,32 @@ class Appointment extends Model
 
     protected $primaryKey = 'id_appointment';
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($appointment) {
+            // Assign queue number based on appointment time
+            $queueNumber = static::where('id_doctor', $appointment->id_doctor)
+                ->whereDate('appointment_date', $appointment->appointment_date)
+                ->whereTime('appointment_time', '<=', $appointment->appointment_time)
+                ->count() + 1;
+            
+            $appointment->queue_number = $queueNumber;
+        });
+    }
+
     protected $fillable = [
-    'id_patient',
-    'id_doctor', // bukan id_doctor_schedule
-    'appointment_date',
-    'appointment_time',
-    'status',
-    'consultation_type',
+        'id_patient',
+        'id_doctor',
+        'appointment_date',
+        'appointment_time',
+        'status',
+        'consultation_type',
+        'queue_number',
+        'is_called',
+        'called_at',
+        'estimated_minutes_remaining'
     ];
 
     public function patient()
