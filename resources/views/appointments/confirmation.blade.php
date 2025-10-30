@@ -11,10 +11,6 @@
                 <div class="p-6">
                     <h3 class="text-lg font-semibold mb-4">Detail Janji</h3>
 
-                    @php
-                    $appointment = session('appointment_temp');
-                    @endphp
-
                     @if ($appointment)
                     <div class="border rounded-lg p-4 mb-6">
                         <div class="flex gap-4">
@@ -27,7 +23,7 @@
                             </div>
 
                             <div class="space-y-2 text-sm text-gray-700">
-                                <p><strong>ID Pasien:</strong> {{ $appointment['patient_name'] }}</p>
+                                <p><strong>Nama Pasien:</strong> {{ $appointment['patient_name'] ?? 'N/A'}}</p>
 
                                 {{-- Tambahan informasi dokter --}}
                                 <p><strong>Nama Dokter:</strong> {{ $appointment['doctor_name'] ?? 'N/A' }}</p>
@@ -62,8 +58,7 @@
                             <span class="font-semibold">Rp 150.000</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Jumlah:</span>
-                            <span class="font-semibold">1</span>
+                            <span class="text-red-600">*Harga adalah biaya booking, bukan biaya janji temu. Setelah melakukan janji temu, Anda akan diminta untuk melunasi pembayaran.</span>
                         </div>
                         <div class="border-t pt-3 flex justify-between">
                             <span class="text-lg font-semibold">Total:</span>
@@ -87,7 +82,7 @@
                                 class="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded">
                                 Buat & Bayar Sekarang
                             </button>
-                            <a href="{{ route('doctors.searchPage') }}"
+                            <a href="{{ route('doctor.details', ['doctor' => $appointment['id_doctor']]) }}"
                                 class="flex-1 bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded text-center">
                                 Batal
                             </a>

@@ -47,7 +47,7 @@ class AppointmentController extends Controller
 
         // Membuat data janji temu baru
         Appointment::create([
-            'patient_id' => $request->patient_id,
+            'id_patient' => $request->patient_id,
             'doctor_id' => $request->doctor_id,
             'date_of_appointment' => $request->date_of_appointment,
             'time_of_appointment' => $request->time_of_appointment,
@@ -69,6 +69,7 @@ class AppointmentController extends Controller
             'id_patient' => $request->id_patient,
             'patient_name' => $request->patient_name,
             'id_doctor_schedule' => $schedule->id_doctor_schedule,
+            'id_doctor' => $schedule->doctor->id_doctor,
             'doctor_name' => $schedule->doctor->name,
             'specialty' => $schedule->doctor->specialty,
             'appointment_date' => $request->appointment_date,
@@ -83,6 +84,10 @@ class AppointmentController extends Controller
 
     public function confirm(Request $request)
     {
-        return view('appointments.confirmation');
+        $appointment = session('appointment');
+
+        // dd($appointment);
+
+        return view('appointments.confirmation', compact('appointment'));
     }
 }
