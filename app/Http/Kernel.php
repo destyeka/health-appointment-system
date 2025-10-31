@@ -38,7 +38,6 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'manage.queue' => \App\Http\Middleware\CheckQueueManagementPermission::class,
+        // e.g., 'auth' => \App\Http\Middleware\Authenticate::class,
     ];
 }
