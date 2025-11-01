@@ -101,9 +101,13 @@
                                         $booked = $appointments->contains(function ($appt) use ($schedule, $day,
                                         $slotStart) {
                                         return $appt->id_doctor_schedule === $schedule->id_doctor_schedule &&
-                                        \Carbon\Carbon::parse($appt->date)->isSameDay($day) &&
-                                        \Carbon\Carbon::parse($appt->start_time)->equalTo($slotStart);
+                                        in_array($appt->status, ['scheduled', 'on_going', 'finished']) &&
+                                        \Carbon\Carbon::parse($appt->appointment_date)->isSameDay($day) &&
+                                        \Carbon\Carbon::parse($appt->appointment_time)->equalTo($slotStart);
                                         });
+                                        $slotDateTime = \Carbon\Carbon::parse($day->format('Y-m-d') . ' ' .
+                                        $slotStart->format('H:i:s'));
+                                        $isPast = $slotDateTime->lessThan(now());
                                         @endphp
 
                                         <li class="flex items-center justify-between py-2 text-sm">
@@ -111,7 +115,7 @@
                                                 {{ $slotStart->format('H:i') }} – {{ $slotEnd->format('H:i') }}
                                             </span>
 
-                                            @if ($booked)
+                                            @if ($booked || $isPast)
                                             <span
                                                 class="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-md">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
@@ -122,7 +126,9 @@
                                                 Booked
                                             </span>
                                             @else
-                                            <form action="{{ route('appointments.temp') }}" method="POST">
+                                            <form
+                                                action="{{ route('appointments.temp', $schedule->id_doctor_schedule) }}"
+                                                method="POST">
                                                 @csrf
                                                 <input type="hidden" name="id_patient"
                                                     value="{{ Auth::user()->patient->id_patient ?? '' }}">

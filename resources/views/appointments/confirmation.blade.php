@@ -9,6 +9,16 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
+                    @if(session('success'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                        {{ session('success') }}
+                    </div>
+                    @endif
+                    @if(session('error'))
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ session('error') }}
+                    </div>
+                    @endif
                     <h3 class="text-lg font-semibold mb-4">Detail Janji</h3>
 
                     @if ($appointment)
@@ -58,7 +68,8 @@
                             <span class="font-semibold">Rp 150.000</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-red-600">*Harga adalah biaya booking, bukan biaya janji temu. Setelah melakukan janji temu, Anda akan diminta untuk melunasi pembayaran.</span>
+                            <span class="text-red-600">*Harga adalah biaya booking, bukan biaya janji temu. Setelah
+                                melakukan janji temu, Anda akan diminta untuk melunasi pembayaran.</span>
                         </div>
                         <div class="border-t pt-3 flex justify-between">
                             <span class="text-lg font-semibold">Total:</span>
@@ -66,14 +77,13 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('appointments.store') }}" method="POST">
+                    <form action="{{ route('appointments.booking-process', $doctorSchedule) }}" method="POST">
                         @csrf
-                        {{-- Pass hidden data for final submission --}}
                         @if ($appointment)
                         <input type="hidden" name="id_patient" value="{{ $appointment['id_patient'] }}">
                         <input type="hidden" name="id_doctor_schedule" value="{{ $appointment['id_doctor_schedule'] }}">
-                        <input type="hidden" name="date" value="{{ $appointment['appointment_date'] }}">
-                        <input type="hidden" name="start_time" value="{{ $appointment['appointment_time'] }}">
+                        <input type="hidden" name="appointment_date" value="{{ $appointment['appointment_date'] }}">
+                        <input type="hidden" name="appointment_time" value="{{ $appointment['appointment_time'] }}">
                         <input type="hidden" name="consultation_type" value="{{ $appointment['consultation_type'] }}">
                         @endif
 

@@ -7,6 +7,8 @@ use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
@@ -57,7 +59,7 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.index')->with('success', 'Janji temu berhasil dijadwalkan!');
     }
 
-    public function temp(Request $request)
+    public function temp(Request $request, DoctorSchedule $doctorSchedule)
     {
         $schedule = DoctorSchedule::with('doctor')->find($request->id_doctor_schedule);
 
@@ -79,15 +81,96 @@ class AppointmentController extends Controller
 
         session(['appointment' => $appointmentData]);
 
-        return redirect()->route('appointments.confirmation');
+        return redirect()->route('appointments.confirmation', compact('doctorSchedule'));
     }
 
-    public function confirm(Request $request)
+    public function confirm(Request $request, DoctorSchedule $doctorSchedule)
     {
         $appointment = session('appointment');
 
         // dd($appointment);
 
-        return view('appointments.confirmation', compact('appointment'));
+        return view('appointments.confirmation', compact('appointment', 'doctorSchedule'));
+    }
+
+    public function bookingProcess(Request $request, DoctorSchedule $doctorSchedule)
+    {
+        $expiredHours = (int) config('services.payment.expired_hours', 24);
+
+        $appointment = Appointment::create([
+            'id_patient' => $request->id_patient,
+            'id_doctor_schedule' => $request->id_doctor_schedule,
+            'appointment_date' => Carbon::parse($request->appointment_date)->format('Y/m/d'),
+            'appointment_time' => Carbon::parse($request->appointment_time)->format('H:i'),
+            'consultation_type' => $request->consultation_type,
+        ]);
+
+        $payment = $appointment->payment()->create([
+            'grand_total' => 0,
+            'booking_is_paid' => false,
+            'repayment_is_paid' => false
+        ]);
+
+        $payment->paymentDetails()->create([
+            'amount' => 150000,
+            'payment_type' => 'booking',
+            'status_payment' => 'waiting',
+            'order_number' => 'BOOKING-' . $payment->id_payment . now()->format('YmdHis'),
+            'expired_at' => now()->addHours($expiredHours)
+        ]);
+
+        $grand_total = $payment->paymentdetails()->sum('amount');
+        $payment->update([
+            'grand_total' => $grand_total
+        ]);
+
+        $payment_details = $payment->paymentDetails->first();
+        $id_payment_detail = $payment_details->id_payment_detail;
+        $amount = $payment_details?->amount;
+        $payment_type = $payment_details?->payment_type;
+        $order_number = $payment_details?->order_number;
+
+        try {
+            $response = Http::withHeaders([
+                'X-API-Key' => config('services.payment.api_key'),
+                'Accept' => 'application/json',
+            ])->post(config('services.payment.base_url') . '/virtual-account/create', [
+                        'external_id' => $order_number,
+                        'amount' => $amount,
+                        'customer_name' => auth()->user()->patient->name,
+                        'customer_email' => auth()->user()->email,
+                        'customer_phone' => auth()->user()->patient->phone,
+                        'description' => 'Pembayaran ' . $payment_type,
+                        'expired_duration' => $expiredHours,
+                        'callback_url' => route('payments.success', $id_payment_detail),
+                        'metadata' => [
+                            'product_id' => $id_payment_detail,
+                            'user_id' => auth()->id(),
+                        ],
+                    ]);
+            if ($response->successful()) {
+                $data = $response->json();
+
+                $payment->paymentDetails()->where('payment_type', $payment_type)->update([
+                    'va_number' => $data['data']['va_number'],
+                    'payment_url' => $data['data']['payment_url'],
+                ]);
+
+                return redirect()->route('payments.waiting', $id_payment_detail);
+
+            } else {
+                dd($response);
+                $payment->paymentDetails()->update(['status_payment' => 'failed']);
+                dd($response->status(), $response->body(), $response->json());
+                return redirect()->route('appointments.confirmation', $doctorSchedule)
+                    ->with('error', 'Gagal membuat pembayaran. Silakan coba lagi.');
+            }
+            
+        } catch (\Exception $e) {
+            $payment->paymentDetails()->update(['status_payment' => 'failed']);
+            return redirect()->route('appointments.confirmation', $doctorSchedule)
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+
     }
 }

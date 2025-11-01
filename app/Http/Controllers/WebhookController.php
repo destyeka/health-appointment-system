@@ -36,7 +36,7 @@ class WebhookController extends Controller
         if ($event === 'payment.success') {
             $externalId = $data['external_id'];
 
-            $paymentDetails = PaymentDetail::where('id_payment_detail', $externalId)->first();
+            $paymentDetails = PaymentDetail::where('order_number', $externalId)->first();
 
             if (!$paymentDetails) {
                 Log::warning('Payment details not found', ['external_id' => $externalId]);
@@ -52,9 +52,13 @@ class WebhookController extends Controller
 
             // Update order status
             $paymentDetails->update([
+                'method' => $data['payment_method'],
                 'status_payment' => 'paid',
+                'paid_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            $paymentDetails->refresh();
 
             // // Reduce product stock
             // $product = $paymentDetails->product;
@@ -72,10 +76,10 @@ class WebhookController extends Controller
         if ($event === 'payment.failed') {
             $externalId = $data['external_id'];
 
-            $paymentDetails = PaymentDetail::where('id_payment_detail', $externalId)->first();
+            $paymentDetails = PaymentDetail::where('order_number', $externalId)->first();
 
             if ($paymentDetails) {
-                $paymentDetails->update(['status_payment' => 'unpaid']);
+                $paymentDetails->update(['status_payment' => 'failed']);
                 Log::info('Payment failed processed', ['id_payment_detail' => $paymentDetails->id_payment_detail]);
             }
 
@@ -85,10 +89,11 @@ class WebhookController extends Controller
         if ($event === 'payment.expired') {
             $externalId = $data['external_id'];
 
-            $paymentDetails = PaymentDetail::where('id_payment_detail', $externalId)->first();
+            $paymentDetails = PaymentDetail::where('order_number', $externalId)->first();
 
             if ($paymentDetails) {
-                $paymentDetails->update(['status_payment' => 'unpaid']);
+                $paymentDetails->update(['status_payment' => 'expired']);
+                $paymentDetails->payment->appointment->update(['status' => 'canceled']);
                 Log::info('Payment expired processed', ['id_payment_detail' => $paymentDetails->id_payment_detail]);
             }
 

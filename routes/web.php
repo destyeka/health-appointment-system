@@ -89,8 +89,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('permissions', PermissionController::class);
 
     Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
-    Route::get('/appointment/confirmation', [AppointmentController::class, 'confirm'])->name('appointments.confirmation');
-    Route::post('/appointments/temp', [AppointmentController::class, 'temp'])->name('appointments.temp');
+    Route::get('/appointment/{doctorSchedule}/confirmation', [AppointmentController::class, 'confirm'])->name('appointments.confirmation');
+    Route::post('/appointments/{doctorSchedule}/temp', [AppointmentController::class, 'temp'])->name('appointments.temp');
+    Route::post('/appointments/{doctorSchedule}/process', [AppointmentController::class, 'bookingProcess'])->name('appointments.booking-process');
+
+    Route::get('/payments/{payment_details}/waiting', [PaymentController::class, 'waiting'])->name('payments.waiting');
+    Route::get('/payments/{payment_details}/check-status', [PaymentController::class, 'checkStatus'])->name('payments.check-status');
+    Route::get('/payments/{payment_details}/success', [PaymentController::class, 'success'])->name('payments.success');
 
 });
 
