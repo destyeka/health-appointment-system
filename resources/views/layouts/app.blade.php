@@ -33,39 +33,6 @@
                             class="text-gray-600 hover:text-gray-900">Profil</a>
                         @endif
 
-                        {{-- Link untuk pasien: Lihat Jadwal --}}
-                        @php $roleName = strtolower(optional($user->role)->role_name ?? ''); @endphp
-                        @if($roleName === 'patient' || $roleName === 'user')
-                        @php
-                            $upcomingCount = 0;
-                            $user = Auth::user();
-                            if ($user) {
-                                $today = \Carbon\Carbon::today()->toDateString();
-                                if (\Illuminate\Support\Facades\Schema::hasColumn('appointments', 'patient_id')) {
-                                    $patientUserId = $user->id_user ?? $user->getKey();
-                                    $upcomingCount = \Illuminate\Support\Facades\DB::table('appointments')
-                                        ->where('patient_id', $patientUserId)
-                                        ->whereDate('appointment_date', '>=', $today)
-                                        ->whereIn('status', ['scheduled', 'confirmed'])
-                                        ->count();
-                                } elseif (\Illuminate\Support\Facades\Schema::hasColumn('appointments', 'id_patient')) {
-                                    $patientId = optional($user->patient)->id_patient ?? null;
-                                    if ($patientId) {
-                                        $upcomingCount = \App\Models\Appointment::where('id_patient', $patientId)
-                                            ->whereDate('appointment_date', '>=', $today)
-                                            ->whereIn('status', ['scheduled', 'confirmed'])
-                                            ->count();
-                                    }
-                                }
-                            }
-                        @endphp
-                        <a href="{{ route('appointments.my') }}" class="text-gray-600 hover:text-gray-900">Lihat Jadwal
-                            @if($upcomingCount > 0)
-                                <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-4 text-white bg-red-600 rounded-full">{{ $upcomingCount }}</span>
-                            @endif
-                        </a>
-                        @endif
-
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="text-red-600 hover:text-red-900">Logout</button>

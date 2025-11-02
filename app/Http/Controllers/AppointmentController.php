@@ -32,9 +32,7 @@ class AppointmentController extends Controller
 
         if ($roleName === 'admin') {
             // Admin: lihat semua
-            $appointments = $query->orderBy('appointment_date', 'asc')
-                                ->orderBy('appointment_time', 'asc')
-                                ->get();
+            $appointments = $query->get();
 
         } elseif ($roleName === 'doctor') {
             // Doctor: hanya jadwal milik dokter
@@ -47,8 +45,6 @@ class AppointmentController extends Controller
                     ->leftJoin('users as doctors', 'appointments.doctor_id', 'doctors.id_user')
                     ->select('appointments.*', 'patients.name as patient_name', 'doctors.name as doctor_name')
                     ->where('appointments.doctor_id', $doctorUserId)
-                    ->orderBy('appointments.appointment_date', 'asc')
-                    ->orderBy('appointments.appointment_time', 'asc')
                     ->get()
                     ->map(function ($r) {
                         // Pastikan properti id_appointment ada (dipakai view)
@@ -115,11 +111,6 @@ public function bookStore(Request $request)
 
     $patientId = auth()->user()->patient->id_patient;
 
-    // Hitung nomor antrean untuk jadwal ini
-    $lastQueueNumber = Appointment::where('id_doctor_schedule', $request->schedule_id)
-        ->whereDate('appointment_date', $request->date_of_appointment)
-        ->max('queue_number') ?? 0;
-
     Appointment::create([
         'id_patient' => $patientId,
         'id_doctor_schedule' => $request->schedule_id,
@@ -127,8 +118,6 @@ public function bookStore(Request $request)
         'appointment_time' => $request->time_of_appointment,
         'status' => 'scheduled',
         'consultation_type' => 'offline', // default
-        'queue_number' => $lastQueueNumber + 1,
-        'is_called' => false
     ]);
 
     return redirect()->route('home')->with('success', 'Janji temu berhasil dibuat!');
@@ -159,22 +148,13 @@ public function bookStore(Request $request)
 
 
 
-    // Hitung nomor antrean - ambil nomor terakhir untuk dokter dan tanggal yang sama
-    // Hitung nomor antrean berdasarkan waktu appointment
-    $queueNumber = Appointment::where('id_doctor', $request->doctor_id)
-        ->whereDate('appointment_date', $request->date_of_appointment)
-        ->whereTime('appointment_time', '<=', $request->time_of_appointment)
-        ->count() + 1;
-
     Appointment::create([
-        'id_patient' => $patient->id_patient,
-        'id_doctor' => $request->doctor_id,
-        'appointment_date' => $request->date_of_appointment,
-        'appointment_time' => $request->time_of_appointment,
-        'status' => 'scheduled',
-        'consultation_type' => 'offline',
-        'queue_number' => $queueNumber,
-        'is_called' => false
+    'id_patient' => $patient->id_patient,
+    'id_doctor' => $request->doctor_id,
+    'appointment_date' => $request->date_of_appointment,
+    'appointment_time' => $request->time_of_appointment,
+    'status' => 'scheduled',
+    'consultation_type' => 'offline',
     ]);
 
 
@@ -203,121 +183,5 @@ public function bookStore(Request $request)
     {
         $appointment->delete();
         return redirect()->route('appointments.index')->with('success', 'Appointment deleted.');
-    }
-
-    /**
-     * Tampilkan daftar appointment untuk dokter
-     */
-    public function doctorAppointments()
-    {
-        $user = Auth::user();
-        $today = now()->toDateString();
-
-        if ($user->role->role_name !== 'Doctor') {
-            return redirect()->back()->with('error', 'Unauthorized access');
-        }
-
-        $doctorId = $user->doctor->id_doctor;
-
-        // Get appointments and order them by time
-        $appointments = Appointment::where('id_doctor', $doctorId)
-            ->whereDate('appointment_date', $today)
-            ->orderBy('appointment_time')
-            ->with(['patient'])
-            ->get()
-            ->map(function($appointment, $index) {
-                $appointment->queue_number = $index + 1;
-                return $appointment;
-            })
-            ->map(function ($appointment) {
-                // If no queue number is assigned yet, assign one
-                if (!$appointment->queue_number) {
-                    $lastQueueNumber = Appointment::where('id_doctor', $appointment->id_doctor)
-                        ->whereDate('appointment_date', $appointment->appointment_date)
-                        ->where('queue_number', '>', 0)
-                        ->max('queue_number') ?? 0;
-                    
-                    $appointment->queue_number = $lastQueueNumber + 1;
-                    $appointment->save();
-                }
-                return $appointment;
-            });
-
-        return view('appointments.doctor-schedule', compact('appointments'));
-    }
-
-    /**
-     * Update status appointment
-     */
-    public function updateStatus(Request $request, Appointment $appointment)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->role_name !== 'Doctor' && $user->role->role_name !== 'Admin') {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        if ($user->role->role_name === 'Doctor' && $appointment->id_doctor !== $user->doctor->id_doctor) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $validStatuses = ['scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled'];
-        
-        $request->validate([
-            'status' => 'required|in:' . implode(',', $validStatuses)
-        ]);
-
-        $appointment->status = $request->status;
-        if ($request->status === 'completed') {
-            $appointment->is_called = true;
-            $appointment->called_at = now();
-        }
-        $appointment->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated successfully',
-            'appointment' => $appointment
-        ]);
-    }
-
-    /**
-     * Menampilkan janji temu milik pasien yang sedang login.
-     * GET /my-appointments
-     */
-    public function myAppointments()
-    {
-        $user = Auth::user();
-        $user->loadMissing('role');
-
-        $query = Appointment::with(['patient', 'doctor']);
-
-        $hasPatientId = Schema::hasColumn('appointments', 'patient_id');
-        $hasIdPatient = Schema::hasColumn('appointments', 'id_patient');
-
-        if ($hasPatientId) {
-            $patientUserId = $user->id_user ?? $user->getKey();
-
-            $rows = DB::table('appointments')
-                ->leftJoin('users as doctors', 'appointments.doctor_id', 'doctors.id_user')
-                ->leftJoin('users as patients', 'appointments.patient_id', 'patients.id_user')
-                ->select('appointments.*', 'patients.name as patient_name', 'doctors.name as doctor_name')
-                ->where('appointments.patient_id', $patientUserId)
-                ->get()
-                ->map(function ($r) {
-                    $r->id_appointment = $r->id_appointment ?? $r->id ?? null;
-                    return $r;
-                });
-
-            $appointments = $rows;
-
-        } elseif ($hasIdPatient) {
-            $patientId = optional($user->patient)->id_patient ?? null;
-            $appointments = $query->where('id_patient', $patientId)->get();
-        } else {
-            $appointments = collect();
-        }
-
-        return view('appointments.index', compact('appointments', 'user'));
     }
 }

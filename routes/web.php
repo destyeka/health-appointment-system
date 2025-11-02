@@ -11,7 +11,6 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\WebhookController;
-use App\Http\Controllers\QueueController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -96,31 +95,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/appointments/store', [AppointmentController::class, 'store'])->name('appointments.store');
 
 
-        Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
+    Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
 
-    // Route untuk fitur antrean
-    Route::get('/antrian', [QueueController::class, 'index'])->name('queue.index');
-    Route::get('/queue/status', [QueueController::class, 'getStatus'])->name('queue.status');
-    Route::post('/queue/update', [QueueController::class, 'updateStatus'])
-        ->name('queue.update')
-        ->middleware('manage.queue');
 });
-
-// Route::resource('user-roles', RoleController::class)->parameters([
-
-    // Route untuk pasien melihat jadwal mereka (menu "Lihat Jadwal")
-    Route::get('/my-appointments', [AppointmentController::class, 'myAppointments'])
-        ->name('appointments.my');
-
-    // Routes untuk dokter mengelola jadwal appointment
-    Route::get('/doctor/appointments', [AppointmentController::class, 'doctorAppointments'])
-        ->name('appointments.doctor')
-        ->middleware('auth');
-    
-    Route::post('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])
-        ->name('appointments.updateStatus')
-        ->middleware('auth');
-
 
 
 // Route::resource('user-roles', RoleController::class)->parameters([
