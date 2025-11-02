@@ -9,9 +9,11 @@ class Appointment extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'id_appointment';
+
     protected $fillable = [
         'id_patient',
-        'id_doctor',
+        'id_doctor_schedule',
         'appointment_date',
         'appointment_time',
         'status',
@@ -19,23 +21,12 @@ class Appointment extends Model
     ];
 
     protected $casts = [
-        'appointment_date' => 'date',
-        'appointment_time' => 'time'
+        'appointment_date' => 'datetime',
+        'appointment_time' => 'datetime'
     ];
 
     public function doctorSchedule() {
         return $this->belongsTo(DoctorSchedule::class, 'id_doctor_schedule', 'id_doctor_schedule');
-    }
-
-    public function doctor() {
-        return $this->hasOneThrough(
-            Doctor::class,
-            DoctorSchedule::class,
-            'id_doctor_schedule', // Foreign key on doctor_schedules table
-            'id_doctor', // Foreign key on doctors table
-            'id_doctor_schedule', // Local key on appointments table
-            'id_doctor' // Local key on doctor_schedules table
-        );
     }
 
     public function patient() {
