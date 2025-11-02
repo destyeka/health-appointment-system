@@ -15,12 +15,6 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @if(strtolower(optional(auth()->user()->role)->role_name ?? '') === 'doctor' || 
-                        strtolower(optional(auth()->user()->role)->role_name ?? '') === 'admin')
-                        <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
-                            {{ __('Appointments') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
@@ -76,12 +70,6 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @if(strtolower(optional(auth()->user()->role)->role_name ?? '') === 'doctor' || 
-                strtolower(optional(auth()->user()->role)->role_name ?? '') === 'admin')
-                <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
-                    {{ __('Appointments') }}
-                </x-responsive-nav-link>
-            @endif
         </div>
 
         <!-- Responsive Settings Options -->

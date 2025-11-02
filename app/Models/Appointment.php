@@ -9,25 +9,41 @@ class Appointment extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'id_appointment';
-
     protected $fillable = [
-    'id_patient',
-    'id_doctor', // bukan id_doctor_schedule
-    'appointment_date',
-    'appointment_time',
-    'status',
-    'consultation_type',
+        'id_patient',
+        'id_doctor',
+        'appointment_date',
+        'appointment_time',
+        'status',
+        'consultation_type'
     ];
 
-    public function patient()
-    {
+    protected $casts = [
+        'appointment_date' => 'date',
+        'appointment_time' => 'time'
+    ];
+
+    public function doctorSchedule() {
+        return $this->belongsTo(DoctorSchedule::class, 'id_doctor_schedule', 'id_doctor_schedule');
+    }
+
+    public function patient() {
         return $this->belongsTo(Patient::class, 'id_patient', 'id_patient');
     }
 
-    public function doctor()
-    {
-    return $this->belongsTo(Doctor::class, 'id_doctor', 'id_doctor');
+    public function payment() {
+        return $this->hasOne(Payment::class, 'id_appointment', 'id_appointment');
     }
 
+    public function medicalRecord() {
+        return $this->hasOne(MedicalRecord::class, 'id_appointment', 'id_appointment');
+    }
+
+    public function teleMedicine() {
+        return $this->hasOne(TeleMedicine::class, 'id_appointment', 'id_appointment');
+    }
+
+    public function notifications() {
+        return $this->hasMany(Notification::class, 'id_appointment', 'id_appointment');
+    }
 }
