@@ -15,54 +15,6 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @php $role = strtolower(optional(auth()->user()->role)->role_name ?? ''); @endphp
-                    @if($role === 'doctor')
-                        <x-nav-link :href="route('appointments.doctor')" :active="request()->routeIs('appointments.doctor')">
-                            {{ __('Jadwal Pemeriksaan') }}
-                        </x-nav-link>
-                    @endif
-                    @if($role === 'admin')
-                        <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
-                            {{ __('Appointments') }}
-                        </x-nav-link>
-                    @endif
-
-                    {{-- Tombol/menu untuk pasien: Lihat Jadwal --}}
-                    @if($role === 'patient' || $role === 'user')
-                        @php
-                            $upcomingCount = 0;
-                            if (Auth::check()) {
-                                $today = \Carbon\Carbon::today()->toDateString();
-                                if (\Illuminate\Support\Facades\Schema::hasColumn('appointments', 'patient_id')) {
-                                    $patientUserId = Auth::user()->id_user ?? Auth::user()->getKey();
-                                    $upcomingCount = \Illuminate\Support\Facades\DB::table('appointments')
-                                        ->where('patient_id', $patientUserId)
-                                        ->whereDate('appointment_date', '>=', $today)
-                                        ->whereIn('status', ['scheduled', 'confirmed'])
-                                        ->count();
-                                } elseif (\Illuminate\Support\Facades\Schema::hasColumn('appointments', 'id_patient')) {
-                                    $patientId = optional(Auth::user()->patient)->id_patient ?? null;
-                                    if ($patientId) {
-                                        $upcomingCount = \App\Models\Appointment::where('id_patient', $patientId)
-                                            ->whereDate('appointment_date', '>=', $today)
-                                            ->whereIn('status', ['scheduled', 'confirmed'])
-                                            ->count();
-                                    }
-                                }
-                            }
-                        @endphp
-
-                        <x-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
-                            {{ __('Lihat Jadwal') }}
-                            @if($upcomingCount > 0)
-                                <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-4 text-white bg-red-600 rounded-full">{{ $upcomingCount }}</span>
-                            @endif
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.index')">
-                            {{ __('Lihat Antrean') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
@@ -114,29 +66,10 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-            <div class="pt-2 pb-3 space-y-1">
+        <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @php $role = strtolower(optional(auth()->user()->role)->role_name ?? ''); @endphp
-            @if($role === 'doctor')
-                <x-responsive-nav-link :href="route('appointments.doctor')" :active="request()->routeIs('appointments.doctor')">
-                    {{ __('Jadwal Pemeriksaan') }}
-                </x-responsive-nav-link>
-            @endif
-            @if($role === 'admin')
-                <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')">
-                    {{ __('Appointments') }}
-                </x-responsive-nav-link>
-            @endif
-            @if($role === 'patient' || $role === 'user')
-                <x-responsive-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
-                    {{ __('Lihat Jadwal') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.index')">
-                    {{ __('Lihat Antrean') }}
-                </x-responsive-nav-link>
-            @endif
         </div>
 
         <!-- Responsive Settings Options -->
