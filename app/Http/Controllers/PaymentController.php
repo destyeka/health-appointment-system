@@ -35,80 +35,80 @@ class PaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    
+
     public function store(Request $request)
     {
-        $expiredHours = (int) config('services.payment.expired_hours', 24);
+        // $expiredHours = (int) config('services.payment.expired_hours', 24);
 
-        $payment = Payment::create([
-            'id_appointment' => 1,
-            'grand_total' => 150000,
-            'booking_is_paid' => false,
-            'repayment_is_paid' => false
-        ]);
+        // $payment = Payment::create([
+        //     'id_appointment' => 1,
+        //     'grand_total' => 150000,
+        //     'booking_is_paid' => false,
+        //     'repayment_is_paid' => false
+        // ]);
 
-        $payment->paymentDetails()->create([
-            'amount' => 150000,
-            'method' => 'credit_card',
-            'payment_type' => 'booking',
-            'status_payment' => 'unpaid'
-        ]);
+        // $payment->paymentDetails()->create([
+        //     'amount' => 150000,
+        //     'method' => 'credit_card',
+        //     'payment_type' => 'booking',
+        //     'status_payment' => 'unpaid'
+        // ]);
 
-        $detail = $payment->paymentDetails->first();
-        $id = (string)$detail?->id_payment_detail;
-        $amount = $detail?->amount;
-        $payment_type = $detail?->payment_type;
+        // $detail = $payment->paymentDetails->first();
+        // $id = (string)$detail?->id_payment_detail;
+        // $amount = $detail?->amount;
+        // $payment_type = $detail?->payment_type;
 
-        try {
-            $response = Http::withHeaders([
-                'X-API-Key' => config('services.payment.api_key'),
-                'Accept' => 'application/json',
-            ])->post(config('services.payment.base_url') . '/virtual-account/create', [
-                        'external_id' => $id,
-                        'amount' => $amount,
-                        'customer_name' => auth()->user()->email,
-                        'customer_email' => auth()->user()->email,
-                        'customer_phone' => '081234567890',
-                        'description' => 'Pembayaran ' . $payment_type,
-                        'expired_duration' => $expiredHours,
-                        'callback_url' => route('payments.index'),
-                        'metadata' => [
-                            'product_id' => $id,
-                            'user_id' => auth()->id(),
-                        ],
-                    ]);
+        // try {
+        //     $response = Http::withHeaders([
+        //         'X-API-Key' => config('services.payment.api_key'),
+        //         'Accept' => 'application/json',
+        //     ])->post(config('services.payment.base_url') . '/virtual-account/create', [
+        //                 'external_id' => $id,
+        //                 'amount' => $amount,
+        //                 'customer_name' => auth()->user()->email,
+        //                 'customer_email' => auth()->user()->email,
+        //                 'customer_phone' => '081234567890',
+        //                 'description' => 'Pembayaran ' . $payment_type,
+        //                 'expired_duration' => $expiredHours,
+        //                 'callback_url' => route('payments.index'),
+        //                 'metadata' => [
+        //                     'product_id' => $id,
+        //                     'user_id' => auth()->id(),
+        //                 ],
+        //             ]);
 
-            if ($response->successful()) {
-                $data = $response->json();
+        //     if ($response->successful()) {
+        //         $data = $response->json();
 
-                $payment->paymentDetails()->where('payment_type', $payment_type)->update([
-                    'status_payment' => 'paid'
-                ]);
+        //         $payment->paymentDetails()->where('payment_type', $payment_type)->update([
+        //             'status_payment' => 'paid'
+        //         ]);
 
-                if ($payment_type === 'booking') {
-                    $payment->update([
-                        'booking_is_paid' => true
-                    ]);
-                } else {
-                    $payment->update([
-                        'repayment_is_paid' => true
-                    ]);
-                }
+        //         if ($payment_type === 'booking') {
+        //             $payment->update([
+        //                 'booking_is_paid' => true
+        //             ]);
+        //         } else {
+        //             $payment->update([
+        //                 'repayment_is_paid' => true
+        //             ]);
+        //         }
 
-                return redirect()->route('payments.index');
+        //         return redirect()->route('payments.index');
 
-            } else {
-                $payment->paymentDetails()->update(['status_payment' => 'unpaid']);
-                dd($response->status(), $response->body(), $response->json());
-                return redirect()->route('payments.index')
-                    ->with('error', 'Gagal membuat pembayaran. Silakan coba lagi.');
-            }
-            
-        } catch (\Exception $e) {
-            $payment->paymentDetails()->update(['status_payment' => 'unpaid']);
-            return redirect()->route('payments.index')
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        //     } else {
+        //         $payment->paymentDetails()->update(['status_payment' => 'unpaid']);
+        //         dd($response->status(), $response->body(), $response->json());
+        //         return redirect()->route('payments.index')
+        //             ->with('error', 'Gagal membuat pembayaran. Silakan coba lagi.');
+        //     }
+
+        // } catch (\Exception $e) {
+        //     $payment->paymentDetails()->update(['status_payment' => 'unpaid']);
+        //     return redirect()->route('payments.index')
+        //         ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        // }
 
     }
 
@@ -152,5 +152,61 @@ class PaymentController extends Controller
         $payment->delete();
 
         return redirect()->route('payments.index')->with('success', 'Deleted');
+    }
+
+    public function waiting(PaymentDetail $payment_details)
+    {
+        if ($payment_details->payment->appointment->patient->id_user !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($payment_details->status_payment == 'paid') {
+            return redirect()->route('payments.success', $payment_details);
+        }
+
+        if ($payment_details->status_payment == 'expired') {
+            return redirect()->route('doctors.searchPage')
+                ->with('error', 'Pembayaran telah expired.');
+        }
+
+        return view('appointments.waiting', compact('payment_details'));
+    }
+
+    public function checkStatus(PaymentDetail $payment_details)
+    {
+        if ($payment_details->payment->appointment->patient->id_user !== auth()->id()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'status' => $payment_details->status_payment,
+            'paid_at' => $payment_details->paid_at?->toISOString(),
+        ]);
+    }
+
+    public function success(PaymentDetail $payment_details)
+    {
+        if ($payment_details->payment->appointment->patient->id_user !== auth()->id()) {
+            abort(403);
+        }
+
+        $payment_details->refresh();
+
+        if ($payment_details->status_payment !== 'paid') {
+            return redirect()->route('payments.waiting', $payment_details);
+        }
+
+
+        if ($payment_details->payment_type === 'booking') {
+            $payment_details->payment->update([
+                'booking_is_paid' => true
+            ]);
+        } elseif ($payment_details->payment_type === 'repayment'){
+            $payment_details->payment->update([
+                'repayment_is_paid' => true
+            ]);
+        }
+
+        return view('appointments.success', compact('payment_details'));
     }
 }
