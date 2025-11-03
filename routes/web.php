@@ -92,9 +92,26 @@ Route::middleware('auth')->group(function () {
     Route::resource('permissions', PermissionController::class);
 
     Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
+    Route::get('/appointment/{doctorSchedule}/confirmation', [AppointmentController::class, 'confirm'])->name('appointments.confirmation');
+    Route::post('/appointments/{doctorSchedule}/temp', [AppointmentController::class, 'temp'])->name('appointments.temp');
+    Route::post('/appointments/{doctorSchedule}/process', [AppointmentController::class, 'bookingProcess'])->name('appointments.booking-process');
+
+    Route::get('/payments/{payment_details}/waiting', [PaymentController::class, 'waiting'])->name('payments.waiting');
+    Route::get('/payments/{payment_details}/check-status', [PaymentController::class, 'checkStatus'])->name('payments.check-status');
+    Route::get('/payments/{payment_details}/success', [PaymentController::class, 'success'])->name('payments.success');
 
 });
+    // == RUTE UNTUK ADMIN (Kelola Appointment) ==
+    Route::get('/admin/appointments', [AppointmentController::class, 'adminIndex'])
+        ->name('admin.appointments.index');
+    Route::get('/admin/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
+    Route::delete('/admin/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
+
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/my-appointments', [AppointmentController::class, 'myBookedAppointments'])
+        ->name('appointments.my');
+});
 
 // Route::resource('user-roles', RoleController::class)->parameters([
     //     'user-roles' => 'role'  

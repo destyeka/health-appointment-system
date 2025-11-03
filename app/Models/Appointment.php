@@ -9,9 +9,11 @@ class Appointment extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'id_appointment';
+
     protected $fillable = [
         'id_patient',
-        'id_doctor',
+        'id_doctor_schedule',
         'appointment_date',
         'appointment_time',
         'status',
@@ -19,8 +21,8 @@ class Appointment extends Model
     ];
 
     protected $casts = [
-        'appointment_date' => 'date',
-        'appointment_time' => 'time'
+        'appointment_date' => 'datetime',
+        'appointment_time' => 'datetime'
     ];
 
     public function doctorSchedule() {

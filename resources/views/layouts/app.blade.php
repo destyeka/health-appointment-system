@@ -1,77 +1,110 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'Pondok UNNES') }}</title>
-    <link rel="icon" href="https://i.ibb.co/vJdFHLk/logo.png" type="image/png">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <style>
-        body { background-color: #F5FAFC; font-family: 'Inter', sans-serif; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pondok UNNES</title>
+    @vite('resources/css/app.css')
 </head>
 
-<body class="font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-[#f1f9fb] font-sans antialiased min-h-screen flex flex-col">
 
     {{-- ================= HEADER ================= --}}
-    <nav class="bg-white border-b border-gray-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                {{-- LOGO + NAMA --}}
-                <div class="flex items-center space-x-2">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Logo_of_Universitas_Negeri_Semarang.jpg/960px-Logo_of_Universitas_Negeri_Semarang.jpg" alt="Logo" class="h-5">
-                    <span class="font-semibold text-gray-800">PONDOK UNNES</span>
-                </div>
-
-                {{-- MENU UTAMA --}}
-                <div class="flex items-center space-x-6">
-                    @auth
-                        @php $user = Auth::user(); @endphp
-                        @if ($user->role && $user->role->role_name === 'Admin')
-                            <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-[#009688] text-sm font-medium">Dashboard</a>
-                            <a href="{{ route('doctors.index') }}" class="text-gray-600 hover:text-[#009688] text-sm font-medium">Manage Doctors</a>
-                            <a href="{{ route('patients.index') }}" class="text-gray-600 hover:text-[#009688] text-sm font-medium">Patients</a>
-                        @elseif ($user->role && $user->role->role_name === 'Patient')
-                            <a href="{{ route('doctors.searchPage') }}" class="text-gray-600 hover:text-[#009688] text-sm font-medium">Cari Dokter</a>
-                        @endif
-
-                        {{-- PROFIL DROPDOWN --}}
-                        <div class="relative group">
-                            <button class="flex items-center gap-2 focus:outline-none">
-                                <div class="w-8 h-8 rounded-full bg-[#009688]/10 flex items-center justify-center text-[#009688] font-bold uppercase">
-                                    {{ substr($user->name ?? 'U', 0, 1) }}
-                                </div>
-                            </button>
-                            <div class="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-md shadow-md hidden group-hover:block z-50">
-                                <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil Saya</a>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                        Logout
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    @else
-                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-[#009688] text-sm">Login</a>
-                        <a href="{{ route('register') }}" class="bg-[#009688] hover:bg-[#007f70] text-white text-sm px-4 py-2 rounded-md">Register</a>
-                    @endauth
-                </div>
-            </div>
+    <header class="flex justify-between items-center py-4 px-8 bg-white shadow-sm border-b border-gray-100">
+        {{-- Logo --}}
+        <div class="flex items-center space-x-2">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Logo_of_Universitas_Negeri_Semarang.jpg/960px-Logo_of_Universitas_Negeri_Semarang.jpg"
+                 alt="Logo" class="h-6">
+            <span class="font-semibold text-gray-800">PONDOK UNNES</span>
         </div>
-    </nav>
+
+        {{-- Navigation --}}
+        <nav class="flex items-center space-x-6 text-sm">
+            <a href="{{ route('doctors.searchPage') }}" class="text-gray-700 hover:text-[#009688] transition">Cari Dokter</a>
+
+            {{-- ======= DROPDOWN USER ======= --}}
+            @auth
+                @php
+                    $user = Auth::user();
+                    if ($user->id_role == 1) {
+                        $profileRoute = route('profile.show'); // admin
+                    } elseif ($user->id_role == 2) {
+                        $profileRoute = route('profile.show'); // doctor
+                    } elseif ($user->id_role == 3) {
+                        $profileRoute = route('profile.show'); // patient
+                    } else {
+                        $profileRoute = '#';
+                    }
+                @endphp
+
+                <div class="relative">
+                    <button id="userMenuButton"
+                        class="flex items-center space-x-2 text-gray-700 font-medium focus:outline-none">
+                        <div class="w-7 h-7 rounded-full bg-[#009688] text-white flex items-center justify-center text-sm">
+                            {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
+                        </div>
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown --}}
+                    <div id="userDropdown"
+                        class="absolute right-0 mt-2 bg-white rounded-md shadow-lg border border-gray-100 w-40 hidden z-50 transition ease-out duration-150">
+                        <a href="{{ $profileRoute }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            Profil
+                        </a>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @else
+                <a href="{{ route('login') }}"
+                   class="bg-[#009688] text-white px-4 py-1 rounded-full text-sm hover:bg-[#00796b] transition">
+                   Masuk / Daftar
+                </a>
+            @endauth
+        </nav>
+    </header>
 
     {{-- ================= MAIN CONTENT ================= --}}
-    <main>
-        {{ $slot }}
+    <main class="flex-1 py-8 px-6 max-w-7xl mx-auto w-full">
+        {{ $slot ?? '' }}
+        @yield('content')
     </main>
 
     {{-- ================= FOOTER ================= --}}
     <footer class="bg-white border-t border-gray-100 text-center py-4 text-xs text-gray-500 mt-auto">
         © {{ date('Y') }} Pondok UNNES. Semua Hak Dilindungi.
     </footer>
+
+    {{-- ================= DROPDOWN SCRIPT ================= --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const button = document.getElementById('userMenuButton');
+        const dropdown = document.getElementById('userDropdown');
+
+        // Toggle dropdown saat tombol diklik
+        button?.addEventListener('click', function (e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Tutup dropdown saat klik di luar
+        document.addEventListener('click', function (e) {
+            if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    });
+    </script>
 
 </body>
 </html>
