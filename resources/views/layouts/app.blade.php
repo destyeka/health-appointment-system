@@ -21,23 +21,21 @@
                         $user = Auth::user();
                         @endphp
                         @auth
-                        <span class="text-gray-700">Hello, {{ Auth::user()->id_user }}</span>
-
-                        {{-- Tampilkan hanya untuk pasien --}}
-                        @if(\App\Models\Patient::where('id_user', auth()->id())->exists())
-                            <x-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
-                                {{ __('Jadwal Appointment') }}
-                            </x-nav-link>
-                        @endif
 
                         @if ($user->id_role == 1)
+                        <span class="text-gray-700">Hello, {{ Auth::user()->admin->name }}</span>
                         <a href="{{ route('profile.show') }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                        
                         @elseif ($user->id_role == 2)
-                        <a href="{{ route('profile.show', $user->id_user) }}"
-                            class="text-gray-600 hover:text-gray-900">Profil</a>
+                        <span class="text-gray-700">Hello, {{ Auth::user()->doctor->name }}</span>
+                        <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                        
                         @elseif ($user->id_role == 3)
-                        <a href="{{ route('profile.show', $user->id_user) }}"
-                            class="text-gray-600 hover:text-gray-900">Profil</a>
+                        <span class="text-gray-700">Hello, {{ optional(Auth::user()->patient)->name ?? Auth::user()->name }}</span>
+                        <x-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
+                            {{ __('Jadwal Appointment') }}
+                        </x-nav-link>
+                        <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
                         @endif
 
                         <form method="POST" action="{{ route('logout') }}" class="inline">
