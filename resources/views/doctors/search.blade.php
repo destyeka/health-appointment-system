@@ -1,132 +1,110 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Cari Dokter
-        </h2>
-    </x-slot>
+    {{-- === MAIN CONTENT === --}}
+    <main class="max-w-7xl mx-auto p-8 bg-white mt-6 rounded-2xl shadow-md">
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+        <div class="grid grid-cols-12 gap-6">
+            <!-- SIDEBAR -->
+            <aside class="col-span-3 bg-[#F9FCFD] border border-gray-200 rounded-xl p-5">
+                <h2 class="text-[15px] font-semibold text-gray-700 mb-3">Cari Dokter</h2>
 
-                    <!-- 1. Search Bar (Filter Nama/Spesialis) -->
-                    <input type="text" id="doctor-search-input" placeholder="Ketik nama atau spesialisasi dokter..."
-                        class="form-input rounded-md shadow-sm mt-1 block w-full">
-
-                    <!-- 2. Filter Hari (BARU) -->
-                    <select id="doctor-day-filter" class="form-select rounded-md shadow-sm mt-4 block w-full">
-                        <option value="">Pilih Hari (Semua Hari)</option>
-                        <option value="Senin">Senin</option>
-                        <option value="Selasa">Selasa</option>
-                        <option value="Rabu">Rabu</option>
-                        <option value="Kamis">Kamis</option>
-                        <option value="Jumat">Jumat</option>
-                        <option value="Sabtu">Sabtu</option>
-                        <option value="Minggu">Minggu</option>
+                <!-- Filter Spesialisasi -->
+                <div class="mt-5">
+                    <label class="text-sm font-medium text-gray-600">Spesialisasi</label>
+                    <select id="specialty-filter" class="mt-2 w-full border border-gray-300 rounded-md p-2 text-sm">
+                        <option value="">Semua Spesialisasi</option>
+                        <option value="Jantung">Spesialis Jantung</option>
+                        <option value="Anak">Spesialis Anak</option>
+                        <option value="Kulit">Spesialis Kulit & Kelamin</option>
                     </select>
-
-                    <!-- 3. Area Hasil "Fetching" -->
-                    <div id="doctor-results" class="mt-6">
-                        <!-- Hasil pencarian akan dimuat di sini oleh JavaScript -->
-                    </div>
-
                 </div>
-            </div>
+
+                <!-- Tombol Reset -->
+                <button id="reset-btn"
+                    class="mt-5 w-full text-gray-600 text-sm border border-gray-300 rounded-md py-2 hover:bg-gray-100 transition">
+                    Reset
+                </button>
+            </aside>
+
+            <!-- HASIL DOKTER -->
+            <section class="col-span-9">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4" id="doctor-count">0 Dokter Ditemukan</h2>
+
+                <!-- Input Search -->
+                <div class="relative mb-8">
+                    <input id="search-doctor" type="text" placeholder="Nama Dokter"
+                        class="w-full border border-gray-200 rounded-md py-3 pl-4 pr-10 text-sm focus:ring-1 focus:ring-[#009688] focus:border-[#009688] outline-none">
+                    <span class="absolute right-3 top-3.5 text-gray-400">🔍</span>
+                </div>
+
+                <!-- Container Hasil -->
+                <div id="doctor-results" class="text-center text-gray-500 text-sm font-medium">
+                    Semua data telah tampil
+                </div>
+            </section>
         </div>
-    </div>
-</x-app-layout>
+    </main>
 
-{{-- JavaScript (DIPERBARUI) --}}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        const searchInput = document.getElementById('doctor-search-input');
-        const dayFilter = document.getElementById('doctor-day-filter');
-        const resultsContainer = document.getElementById('doctor-results');
+    {{-- === SCRIPT === --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('search-doctor');
+            const resultContainer = document.getElementById('doctor-results');
+            const doctorCount = document.getElementById('doctor-count');
+            const specialtyFilter = document.getElementById('specialty-filter');
+            const resetBtn = document.getElementById('reset-btn');
 
-        // Fungsi untuk mengambil data (kita buat terpisah agar bisa dipakai ulang)
-        function fetchDoctors() {
-            const query = searchInput.value;
-            const day = dayFilter.value;
+            function fetchDoctors() {
+                const query = input.value.trim();
+                const specialty = specialtyFilter.value.trim();
 
-            // Jangan cari jika input kosong DAN hari tidak dipilih
-            if (query.length < 3 && day === '') {
-                resultsContainer.innerHTML = '<p class="text-gray-500">Silakan ketik nama/spesialis atau pilih hari.</p>';
-                return; 
+                resultContainer.innerHTML = '<p class="text-gray-400">Mencari...</p>';
+
+                fetch(`{{ route('doctors.api.search') }}?query=${encodeURIComponent(query)}&specialty=${encodeURIComponent(specialty)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        resultContainer.innerHTML = '';
+                        doctorCount.textContent = `${data.length} Dokter Ditemukan`;
+
+                        if (data.length === 0) {
+                            resultContainer.innerHTML = '<p class="text-gray-400">Tidak ada dokter ditemukan.</p>';
+                            return;
+                        }
+
+                        data.forEach(doctor => {
+                            const card = `
+                                <div class="flex justify-between items-center border border-gray-200 bg-white rounded-xl p-5 mb-4 shadow-sm hover:shadow-md transition">
+                                    <div class="flex items-center gap-4">
+                                        <img src="https://i.ibb.co/qY8xXfK/default-doctor.png" alt="Doctor" class="w-16 h-16 rounded-md object-cover border">
+                                        <div class="text-left">
+                                            <h3 class="font-semibold text-gray-800">${doctor.name}</h3>
+                                            <p class="text-sm text-gray-600">${doctor.specialty}</p>
+                                            <a href="/doctor/${doctor.id_doctor}/book" class="text-[#009688] text-sm font-medium hover:underline">Lihat Jadwal</a>
+                                        </div>
+                                    </div>
+                                    <a href="/doctor/${doctor.id_doctor}/book"
+                                        class="border border-[#009688] text-[#009688] px-4 py-2 rounded-md text-sm hover:bg-[#009688] hover:text-white transition">
+                                        Book Appointment
+                                    </a>
+                                </div>
+                            `;
+                            resultContainer.innerHTML += card;
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        resultContainer.innerHTML = '<p class="text-red-500">Terjadi kesalahan saat mencari.</p>';
+                    });
             }
 
-            // Tentukan URL untuk "Fetching" (sesuai dengan routes/web.php)
-            const url = `{{ route('doctors.api.search') }}?query=${query}&day=${day}`;
+            input.addEventListener('input', fetchDoctors);
+            specialtyFilter.addEventListener('change', fetchDoctors);
 
-            // Tampilkan loading
-            resultsContainer.innerHTML = '<p class="text-gray-500">Mencari...</p>';
-
-            // Mulai "Fetching"
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    resultsContainer.innerHTML = ''; // Bersihkan hasil lama
-
-                    if (data.length === 0) {
-                        resultsContainer.innerHTML = '<p class="text-gray-500">Dokter tidak ditemukan.</p>';
-                        return;
-                    }
-
-                    // Tampilkan setiap dokter yang ditemukan
-                    data.forEach(doctor => {
-                        
-                        // -- Blok untuk membuat HTML Jadwal --
-                        let scheduleHtml = '<p class="text-sm text-gray-500 mt-1">Jadwal tidak tersedia.</p>';
-                        
-                        // Cek jika 'schedules' ada dan tidak kosong
-                        if (doctor.schedules && doctor.schedules.length > 0) {
-                            scheduleHtml = '<ul class="list-disc list-inside text-sm text-gray-600 mt-2">';
-                            
-                            doctor.schedules.forEach(schedule => {
-                                // Format waktu (menghilangkan :00 di akhir)
-                                const startTime = schedule.start_time.substring(0, 5);
-                                const endTime = schedule.end_time.substring(0, 5);
-                                
-                                scheduleHtml += `<li>
-                                    <strong>${schedule.day}:</strong> ${startTime} - ${endTime}
-                                </li>`;
-                            });
-                            
-                            scheduleHtml += '</ul>';
-                        }
-                        // -- Akhir Blok Jadwal --
-
-                        // Buat HTML card untuk setiap dokter
-                        const doctorCard = `
-                            <div class="border p-4 rounded-lg mb-4 shadow-sm transition hover:shadow-md">
-                                <h3 class="font-bold text-lg text-blue-800">${doctor.name}</h3>
-                                <p class="text-gray-700">${doctor.specialty}</p>
-                                <p class="text-sm text-gray-500 mt-1">Kontak: ${doctor.phone}</p>
-                                
-                                <h4 class="font-semibold text-md mt-3 border-t pt-2">Jadwal:</h4>
-                                ${scheduleHtml}
-                                <a href="/doctor/${doctor.id_doctor}/book" 
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Book Appointment
-                                </a>
-                            </div>
-                        `;
-                        resultsContainer.innerHTML += doctorCard;
-                    });
-
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                    resultsContainer.innerHTML = '<p class="text-red-500">Terjadi kesalahan saat mencari.</p>';
-                });
-        }
-
-        // Tambahkan event listener ke KEDUA input
-        searchInput.addEventListener('keyup', fetchDoctors);
-        dayFilter.addEventListener('change', fetchDoctors);
-
-        // Tampilkan pesan awal
-        resultsContainer.innerHTML = '<p class="text-gray-500">Silakan ketik nama/spesialis atau pilih hari.</p>';
-    });
-</script>
+            resetBtn.addEventListener('click', () => {
+                input.value = '';
+                specialtyFilter.value = '';
+                doctorCount.textContent = '0 Dokter Ditemukan';
+                resultContainer.innerHTML = 'Semua data telah tampil';
+            });
+        });
+    </script>
+</x-app-layout>
