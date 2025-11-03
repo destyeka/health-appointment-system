@@ -23,6 +23,13 @@
                         @auth
                         <span class="text-gray-700">Hello, {{ Auth::user()->id_user }}</span>
 
+                        {{-- Tampilkan hanya untuk pasien --}}
+                        @if(\App\Models\Patient::where('id_user', auth()->id())->exists())
+                            <x-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
+                                {{ __('Jadwal Appointment') }}
+                            </x-nav-link>
+                        @endif
+
                         @if ($user->id_role == 1)
                         <a href="{{ route('profile.show') }}" class="text-gray-600 hover:text-gray-900">Profil</a>
                         @elseif ($user->id_role == 2)

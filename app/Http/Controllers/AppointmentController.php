@@ -8,6 +8,7 @@ use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class AppointmentController extends Controller
@@ -18,10 +19,43 @@ class AppointmentController extends Controller
     public function index()
     {
         // Mengambil semua janji temu dengan data pasien dan dokter terkait
-        $appointments = Appointment::with(['patient', 'doctor'])->get();
+        $appointments = Appointment::with(['patient', 'doctorSchedule.doctor'])->get();
 
         return view('appointments.index', compact('appointments'));
     }
+    public function show($id)
+    {
+        $appointment = Appointment::with([
+                'patient',
+                'doctorSchedule.doctor',
+                'payment'
+            ])
+            ->where('id_appointment', $id)
+            ->first();
+
+        if (!$appointment) {
+            return redirect()->route('appointments.index')->with('error', 'Data appointment tidak ditemukan.');
+        }
+
+        return view('appointments.show', compact('appointment'));
+    }
+
+    /**
+     * Menghapus appointment.
+     */
+    public function destroy($id)
+    {
+        $appointment = Appointment::find($id);
+
+        if (!$appointment) {
+            return redirect()->route('appointments.index')->with('error', 'Data appointment tidak ditemukan.');
+        }
+
+        $appointment->delete();
+
+        return redirect()->route('appointments.index')->with('success', 'Appointment berhasil dihapus.');
+    }
+
 
     /**
      * Menampilkan form untuk membuat janji temu baru.
@@ -173,4 +207,32 @@ class AppointmentController extends Controller
         }
 
     }
+ 
+    public function adminIndex()
+    {
+    // Ambil appointment yang sudah dibayar
+        $appointments = Appointment::with(['patient', 'doctorSchedule.doctor', 'payment'])
+            ->whereHas('payment', function ($query) {
+                $query->where('booking_is_paid', true)
+                    ->orWhere('repayment_is_paid', true);
+            })
+            ->orderBy('appointment_date', 'desc')
+            ->get();
+
+        return view('admin.appointments.index', compact('appointments'));
+    }
+    public function myBookedAppointments()
+    {
+        $userId = Auth::id();
+
+        $appointments = Appointment::with('doctorSchedule.doctor', 'payment')
+            ->where('id_patient', $userId)
+            ->where('status', '!=', 'cancelled') // hanya yang aktif/dibooking
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+
+        return view('appointments.my_booked_appointments', compact('appointments'));
+    }
+
 }
