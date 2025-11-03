@@ -59,7 +59,10 @@
 
                 resultContainer.innerHTML = '<p class="text-gray-400">Mencari...</p>';
 
-                fetch(`{{ route('doctors.api.search') }}?query=${encodeURIComponent(query)}&specialty=${encodeURIComponent(specialty)}`)
+                // Gabungkan nama dan spesialisasi dalam 1 parameter "query"
+                const combinedQuery = [query, specialty].filter(Boolean).join(' ');
+
+                fetch(`{{ route('doctors.api.search') }}?query=${encodeURIComponent(combinedQuery)}`)
                     .then(response => response.json())
                     .then(data => {
                         resultContainer.innerHTML = '';

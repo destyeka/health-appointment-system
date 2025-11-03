@@ -1,26 +1,24 @@
 <x-guest-layout>
-    <div class="flex-1 flex items-center justify-center">
+    <div class="flex-1 flex items-center justify-center min-h-screen pt-4 pb-12 sm:pt-0" style="background-color: #f0f8ff;">
         <div class="text-center">
             <h1 class="text-2xl font-semibold text-gray-800 mb-2">Selamat Datang</h1>
-            <p class="text-sm text-gray-500 mb-6">Akses portal kesehatan Anda</p>
+            <p class="text-base text-gray-600 mb-6">Akses portal kesehatan Anda</p>
 
-            <div class="bg-white p-8 rounded-2xl shadow-lg w-[380px] mx-auto">
-                <!-- Tab -->
-                <div class="flex mb-6 border border-gray-200 rounded-full overflow-hidden text-sm">
+            <div class="bg-white p-8 rounded-2xl shadow-xl w-[380px] mx-auto">
+                <div class="flex mb-6 border border-gray-200 rounded-full overflow-hidden text-sm p-1">
                     <button type="button"
-                        class="w-1/2 py-2 font-medium bg-[#009688] text-white">
+                        class="w-1/2 py-2 font-medium bg-[#00A3A3] text-white rounded-full shadow-md transition duration-200 ease-in-out">
                         Masuk
                     </button>
                     <a href="{{ route('register') }}"
-                        class="w-1/2 py-2 font-medium text-gray-600 hover:bg-gray-100">
+                        class="w-1/2 py-2 font-medium text-gray-600 rounded-full hover:text-gray-900 transition duration-200 ease-in-out">
                         Daftar
                     </a>
                 </div>
 
-                <!-- Notifikasi Error -->
                 @if ($errors->any())
-                    <div class="bg-red-50 text-red-600 text-sm rounded-md p-3 mb-4 text-left">
-                        <ul class="list-disc ml-5">
+                    <div class="bg-red-50 text-red-600 text-sm rounded-lg p-3 mb-4 text-left border border-red-200">
+                        <ul class="list-disc ml-5 space-y-1">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -28,36 +26,32 @@
                     </div>
                 @endif
 
-                <!-- Form Login -->
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
 
-                    <!-- Email -->
                     <div class="text-left mb-4">
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <div class="flex items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50">
-                            <span class="text-gray-400 mr-2 text-sm">📧</span>
+                        <div class="flex items-center rounded-lg px-3 bg-gray-100 border border-gray-100 focus-within:border-[#00A3A3] focus-within:ring-1 focus-within:ring-[#00A3A3] transition duration-200">
+                            <span class="text-gray-400 mr-2 text-base">📧</span>
                             <input id="email" name="email" type="email" required autofocus
-                                   value="{{ old('email') }}"
-                                   class="w-full bg-gray-50 outline-none text-sm text-gray-700"
-                                   placeholder="nama@email.com">
+                                       value="{{ old('email') }}"
+                                       class="w-full bg-gray-100 py-2.5 outline-none text-sm text-gray-700 placeholder-gray-400 border-none focus:ring-0"
+                                       placeholder="nama@email.com">
                         </div>
                     </div>
 
-                    <!-- Password -->
                     <div class="text-left mb-6">
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <div class="flex items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50">
-                            <span class="text-gray-400 mr-2 text-sm">🔒</span>
+                        <div class="flex items-center rounded-lg px-3 bg-gray-100 border border-gray-100 focus-within:border-[#00A3A3] focus-within:ring-1 focus-within:ring-[#00A3A3] transition duration-200">
+                            <span class="text-gray-400 mr-2 text-base">🔒</span>
                             <input id="password" name="password" type="password" required
-                                   class="w-full bg-gray-50 outline-none text-sm text-gray-700"
-                                   placeholder="Masukkan password">
+                                       class="w-full bg-gray-100 py-2.5 outline-none text-sm text-gray-700 placeholder-gray-400 border-none focus:ring-0"
+                                       placeholder="Masukkan password">
                         </div>
                     </div>
 
-                    <!-- Tombol -->
                     <button type="submit"
-                        class="w-full bg-[#009688] hover:bg-[#00796b] text-white py-2 rounded-md text-sm font-medium transition">
+                        class="w-full bg-[#00A3A3] hover:bg-[#008080] text-white py-3 rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg">
                         Masuk
                     </button>
                 </form>
