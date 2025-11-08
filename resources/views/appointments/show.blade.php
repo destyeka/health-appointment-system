@@ -55,43 +55,45 @@
                         <p class="text-gray-600">Status Appointment:</p>
                         @switch($appointment->status)
                             @case('scheduled')
-                                <span class="text-yellow-600 font-semibold">Dijadwalkan</span>
+                                <span class="text-yellow-600 font-semibold">Schedule</span>
                                 @break
                             @case('on_going')
-                                <span class="text-blue-600 font-semibold">Sedang Berlangsung</span>
+                                <span class="text-blue-600 font-semibold">On going</span>
                                 @break
                             @case('finished')
-                                <span class="text-green-600 font-semibold">Selesai</span>
+                                <span class="text-green-600 font-semibold">Finished</span>
                                 @break
                             @case('cancelled')
-                                <span class="text-red-600 font-semibold">Dibatalkan</span>
+                                <span class="text-red-600 font-semibold">Cancelled</span>
                                 @break
                             @default
                                 <span class="text-gray-600">Tidak diketahui</span>
                         @endswitch
-                    </div>
-
-                    <div>
-                        <p class="text-gray-600">Status Pembayaran:</p>
-                        @if ($appointment->payment?->booking_is_paid)
-                            <span class="text-green-600 font-semibold">Sudah Dibayar</span>
-                        @else
-                            <span class="text-red-600 font-semibold">Belum Dibayar</span>
-                        @endif
                     </div>
                 </div>
 
                 {{-- Pembayaran --}}
                 @if ($appointment->payment)
                     <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Detail Pembayaran</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+
+                    {{-- Satu baris untuk total, status, dan tanggal --}}
+                    <div class="grid grid-cols-3 gap-6 mb-6 items-center">
                         <div>
                             <p class="text-gray-600">Total Pembayaran:</p>
-                            <p class="font-semibold">Rp {{ number_format($appointment->payment->grand_total, 0, ',', '.') }}</p>
+                            <p class="font-semibold">
+                                Rp {{ number_format($appointment->payment->grand_total, 0, ',', '.') }}
+                                <span class="ml-2 px-2 py-1 rounded text-white text-sm 
+                                    {{ $appointment->payment->booking_is_paid ? 'bg-green-600' : 'bg-red-600' }}">
+                                    {{ $appointment->payment->booking_is_paid ? 'Paid' : 'Unpaid' }}
+                                </span>
+                            </p>
                         </div>
+
                         <div>
                             <p class="text-gray-600">Tanggal Pembayaran:</p>
-                            <p class="font-semibold">{{ $appointment->payment->created_at->format('d M Y H:i') }}</p>
+                            <p class="font-semibold">
+                                {{ $appointment->payment->created_at ? $appointment->payment->created_at->format('d M Y H:i') : '-' }}
+                            </p>
                         </div>
                     </div>
                 @endif
