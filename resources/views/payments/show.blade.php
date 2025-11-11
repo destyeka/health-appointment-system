@@ -1,164 +1,73 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Detail Pembayaran #{{ $payment->id_payment }}</h1>
+        <a href="{{ route('payments.index') }}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">
+            Kembali
+        </a>
+    </div>
 
-            {{-- Judul + Tombol Aksi --}}
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                        ID: {{ $payment->id_payment ?? 'N/A' }}
-                    </h2>
-                    <p class="text-sm text-gray-600 mt-1">
-                        Updated at: {{ $payment->updated_at?->format('d/m/Y H:i') ?? 'N/A' }}
-                    </p>
-                </div>
-                <div class="flex space-x-3">
-                    <a href="{{ route('payments.edit', $payment) }}" 
-                       class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                        Edit payment
-                    </a>
-                    <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this payment?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                            Delete payment
-                        </button>
-                    </form>
-                    <a href="{{ route('payments.index') }}" 
-                       class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                        Back to List
-                    </a>
-                </div>
-            </div>
-
-            {{-- Notifikasi sukses / error --}}
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            {{-- Card untuk detail role --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Detail payment</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Grand Total</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $payment->grand_total ?? 'N/A' }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Booking Status</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $payment->booking_is_paid ? 'Paid' : 'Unpaid' }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Repayment Status</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $payment->repayment_is_paid ? 'Paid' : 'Unpaid' }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Booking Amount</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $booking_amount }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Repayment Amount</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $repayment_amount }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Booking Method</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $booking_method }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Repayment Method</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ $repayment_method }}</p>
-                        </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div class="p-6 space-y-6">
+            
+            <fieldset class="border border-gray-200 rounded-lg p-4">
+                <legend class="text-base font-semibold text-gray-900 px-2">Informasi Umum</legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Pasien</h3>
+                        <p class="mt-1 text-base text-gray-900">{{ $payment->appointment->patient->name ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Dokter</h3>
+                        <p class="mt-1 text-base text-gray-900">{{ $payment->appointment->doctorSchedule->doctor->name ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Tanggal Janji Temu</h3>
+                        <p class="mt-1 text-base text-gray-900">{{ \Carbon\Carbon::parse($payment->appointment->appointment_date)->translatedFormat('d F Y') }}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Grand Total</h3>
+                        <p class="mt-1 text-base text-gray-900 font-bold">Rp {{ number_format($payment->grand_total, 0, ',', '.') }}</p>
                     </div>
                 </div>
-            </div>
+            </fieldset>
 
-            {{-- Section Users --}}
-            {{-- <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Users with this Role ({{ ($payment->users ?? collect())->count() }})</h3>
-                    @if(($payment->users ?? collect())->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($payment->users ?? collect() as $user)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $payment->role_name ?? 'N/A' }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $user->email ?? 'N/A' }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $user->created_at?->format('d/m/Y') ?? 'N/A' }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="text-center py-8">
-                            <p class="text-gray-500">No users assigned to this role.</p>
-                            <a href="{{ route('user-roles.index') }}" class="text-blue-500 hover:text-blue-700">Manage Users</a>
-                        </div>
-                    @endif
+            <fieldset class="border border-gray-200 rounded-lg p-4">
+                <legend class="text-base font-semibold text-gray-900 px-2">Detail Pembayaran</legend>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Biaya Booking (Awal)</h3>
+                        <p class="mt-1 text-base text-gray-900">Rp {{ number_format($booking_amount, 0, ',', '.') }}</p>
+                        <p class="mt-1 text-sm text-gray-900">Status: 
+                            @if($payment->booking_is_paid)
+                                <span class="font-medium text-green-600">Lunas</span> (Metode: {{ $booking_method ?? 'N/A' }})
+                            @else
+                                <span class="font-medium text-red-600">Belum Lunas</span>
+                            @endif
+                        </p>
+                    </div>
+                     <div>
+                        <h3 class="text-sm font-medium text-gray-500">Biaya Tambahan (Pelunasan)</h3>
+                        <p class="mt-1 text-base text-gray-900">Rp {{ number_format($repayment_amount, 0, ',', '.') }}</p>
+                         <p class="mt-1 text-sm text-gray-900">Status: 
+                            @if($payment->repayment_is_paid)
+                                <span class="font-medium text-green-600">Lunas</span> (Metode: {{ $repayment_method ?? 'N/A' }})
+                            @else
+                                <span class="font-medium text-red-600">Belum Lunas</span>
+                            @endif
+                        </p>
+                    </div>
                 </div>
-            </div> --}}
-
-            {{-- Section Permissions --}}
-            {{-- <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Permissions for this Role ({{ ($payment->permissions ?? collect())->count() }})</h3>
-                    @if(($payment->permissions ?? collect())->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Permission Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($payment->permissions ?? collect() as $permission)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $permission->permission_name ?? 'N/A' }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $permission->description ?? 'No description' }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $permission->created_at?->format('d/m/Y') ?? 'N/A' }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="text-center py-8">
-                            <p class="text-gray-500">No permissions assigned to this role.</p>
-                            <a href="{{ route('permissions.index') }}" class="text-blue-500 hover:text-blue-700">Manage Permissions</a>
-                        </div>
-                    @endif
-                </div>
-            </div> --}}
+            </fieldset>
+        </div>
+        
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-end">
+            <form action="{{ route('payments.destroy', $payment) }}" method="POST" onsubmit="return confirm('Hapus pembayaran ini?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition duration-150">
+                    Hapus Pembayaran
+                </button>
+            </form>
         </div>
     </div>
 </x-app-layout>

@@ -1,126 +1,98 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Detail Appointment') }}
-            </h2>
-            <a href="{{ route('appointments.index') }}" 
-               class="text-blue-600 hover:underline font-semibold">
-                ← Kembali
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Detail Janji Temu</h1>
+        <div class="flex space-x-2">
+             <a href="{{ route('admin.appointments.index') }}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">
+                Kembali
             </a>
         </div>
-    </x-slot>
+    </div>
 
-    <div class="py-6">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-xl sm:rounded-lg p-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                {{-- Informasi Pasien & Dokter --}}
-                <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Informasi Umum</h3>
-
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <p class="text-gray-600">Nama Pasien:</p>
-                        <p class="font-semibold">{{ $appointment->patient->name ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Nama Dokter:</p>
-                        <p class="font-semibold">{{ $appointment->doctorSchedule?->doctor?->name ?? '-' }}</p>
-                    </div>
-
-                    <div>
-                        <p class="text-gray-600">Tanggal Appointment:</p>
-                        <p class="font-semibold">{{ $appointment->appointment_date ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Waktu:</p>
-                        <p class="font-semibold">{{ $appointment->appointment_time ?? '-' }}</p>
-                    </div>
-
-                    <div>
-                        <p class="text-gray-600">Tipe Konsultasi:</p>
-                        <p class="font-semibold">{{ ucfirst($appointment->consultation_type) ?? '-' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Nomor Antrian:</p>
-                        <p class="font-semibold">{{ $appointment->queue_number ?? '-' }}</p>
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Detail Pasien</h3>
+                    <div class="space-y-2">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Nama</h4>
+                            <p class="mt-1 text-base text-gray-900">{{ $appointment->patient->name ?? 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Email</h4>
+                            <p class="mt-1 text-base text-gray-900">{{ $appointment->patient->user->email ?? 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Telepon</h4>
+                            <p class="mt-1 text-base text-gray-900">{{ $appointment->patient->phone ?? 'N/A' }}</p>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Status --}}
-                <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Status</h3>
-
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <p class="text-gray-600">Status Appointment:</p>
-                        @switch($appointment->status)
-                            @case('scheduled')
-                                <span class="text-yellow-600 font-semibold">Dijadwalkan</span>
-                                @break
-                            @case('on_going')
-                                <span class="text-blue-600 font-semibold">Sedang Berlangsung</span>
-                                @break
-                            @case('finished')
-                                <span class="text-green-600 font-semibold">Selesai</span>
-                                @break
-                            @case('cancelled')
-                                <span class="text-red-600 font-semibold">Dibatalkan</span>
-                                @break
-                            @default
-                                <span class="text-gray-600">Tidak diketahui</span>
-                        @endswitch
-                    </div>
-
-                    <div>
-                        <p class="text-gray-600">Status Pembayaran:</p>
-                        @if ($appointment->payment?->booking_is_paid)
-                            <span class="text-green-600 font-semibold">Sudah Dibayar</span>
-                        @else
-                            <span class="text-red-600 font-semibold">Belum Dibayar</span>
-                        @endif
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Detail Dokter</h3>
+                    <div class="space-y-2">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Nama</h4>
+                            <p class="mt-1 text-base text-gray-900">{{ $appointment->doctorSchedule->doctor->name ?? 'N/A' }}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Spesialisasi</h4>
+                            <p class="mt-1 text-base text-gray-900">{{ $appointment->doctorSchedule->doctor->specialty ?? 'N/A' }}</p>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Pembayaran --}}
-                @if ($appointment->payment)
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Detail Pembayaran</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="p-4 bg-gray-50 rounded-lg md:col-span-2">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Detail Janji Temu</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div>
-                            <p class="text-gray-600">Total Pembayaran:</p>
-                            <p class="font-semibold">Rp {{ number_format($appointment->payment->grand_total, 0, ',', '.') }}</p>
+                            <h4 class="text-sm font-medium text-gray-500">Tanggal</h4>
+                            <p class="mt-1 text-base text-gray-900">{{ \Carbon\Carbon::parse($appointment->appointment_date)->translatedFormat('d F Y') }}</p>
                         </div>
                         <div>
-                            <p class="text-gray-600">Tanggal Pembayaran:</p>
-                            <p class="font-semibold">{{ $appointment->payment->created_at->format('d M Y H:i') }}</p>
+                            <h4 class="text-sm font-medium text-gray-500">Waktu</h4>
+                            <p class="mt-1 text-base text-gray-900">{{ $appointment->appointment_time }}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Tipe Konsultasi</h4>
+                            <p class="mt-1 text-base text-gray-900 capitalize">{{ $appointment->consultation_type }}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Status Janji Temu</h4>
+                            <p class="mt-1 text-base text-gray-900 capitalize">{{ $appointment->status }}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Total Biaya</h4>
+                            <p class="mt-1 text-base text-gray-900">Rp {{ number_format($appointment->payment->grand_total ?? 0, 0, ',', '.') }}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500">Status Pembayaran</h4>
+                            @if ($appointment->payment->booking_is_paid)
+                                <span class="px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                                    Lunas
+                                </span>
+                            @else
+                                <span class="px-3 py-1 text-sm font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                                    Menunggu
+                                </span>
+                            @endif
                         </div>
                     </div>
-                @endif
-
-                {{-- Tombol Aksi --}}
-                <div class="flex justify-end space-x-3 mt-6">
-                    <a href="{{ route('appointments.index') }}" 
-                       class="text-blue-600 hover:underline font-semibold">
-                        Kembali ke Daftar
-                    </a>
-
-                    <a href="#" 
-                       onclick="event.preventDefault(); 
-                                if(confirm('Yakin ingin menghapus appointment ini?')) {
-                                    document.getElementById('delete-form-{{ $appointment->id_appointment }}').submit();
-                                }"
-                       class="text-red-600 hover:underline font-semibold">
-                        Hapus Appointment
-                    </a>
-
-                    <form id="delete-form-{{ $appointment->id_appointment }}" 
-                          action="{{ route('appointments.destroy', $appointment->id_appointment) }}" 
-                          method="POST" class="hidden">
-                        @csrf
-                        @method('DELETE')
-                    </form>
                 </div>
 
             </div>
+        </div>
+        
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-end">
+             <form action="{{ route('appointments.destroy', $appointment) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus janji temu ini?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 transition duration-150">
+                    Hapus Janji Temu
+                </button>
+            </form>
         </div>
     </div>
 </x-app-layout>

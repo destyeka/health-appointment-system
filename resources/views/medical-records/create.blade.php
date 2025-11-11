@@ -1,80 +1,59 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Create New Record') }}
-        </h2>
-    </x-slot>
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Tambah Rekam Medis Baru</h1>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    
-                    {{-- Tampilkan Error Validation --}}
-                    @if ($errors->any())
-                        <div class="mb-4">
-                            <ul class="list-disc list-inside text-red-600">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <form action="{{ route('medical-records.store') }}" method="POST">
+            @csrf
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="id_appointment" class="block text-sm font-medium text-gray-700 mb-1">Janji Temu</label>
+                    <select id="id_appointment" name="id_appointment" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                        <option value="" disabled selected>Pilih janji temu yang sudah selesai...</option>
+                        @foreach ($appointments as $appointment)
+                            <option value="{{ $appointment->id_appointment }}" {{ old('id_appointment') == $appointment->id_appointment ? 'selected' : '' }}>
+                                {{ $appointment->patient->name }} - (Dr. {{ $appointment->doctorSchedule->doctor->name }}) - {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y') }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('id_appointment')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                    <form action="{{ route('medical-records.store') }}" method="POST">
-                        @csrf
+                <div>
+                    <label for="diagnosis" class="block text-sm font-medium text-gray-700 mb-1">Diagnosis</label>
+                    <input type="text" id="diagnosis" name="diagnosis" value="{{ old('diagnosis') }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" placeholder="Misal: Hipertensi Grade 1" required>
+                    @error('diagnosis')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                        {{-- Doctor Email --}}
-                        <div class="mb-4">
-                            <label for="id_appointment" class="block text-gray-700 font-bold mb-2">Doctor:</label>
-                            <select name="id_appointment" id="id_appointment"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter doctor name">
-                                   <option value="">-- Choose an appointment --</option>
-                                   @foreach ($appointments as $appointment)
-                                       <option value="{{ $appointment->id_appointment }}">
-                                        {{ $appointment->id_appointment }}
-                                       </option>
-                                   @endforeach
-                            </select>
-                        </div>
+                <div>
+                    <label for="treatment" class="block text-sm font-medium text-gray-700 mb-1">Resep / Treatment</label>
+                    <textarea id="treatment" name="treatment" rows="4" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" placeholder="Misal: Amlodipine 5mg 1x1, Kontrol tekanan darah rutin" required>{{ old('treatment') }}</textarea>
+                    @error('treatment')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                        {{-- Doctor Specialty --}}
-                        <div class="mb-4">
-                            <label for="diagnosis" class="block text-gray-700 font-bold mb-2">Diagnosis</label>
-                            <input type="text" name="diagnosis" id="diagnosis" value="{{ old('diagnosis') }}"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter diagnosis">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="treatment" class="block text-gray-700 font-bold mb-2">Treatment:</label>
-                            <textarea name="treatment" id="treatment" rows="3"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter treatment">{{ old('treatment') }}</textarea>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="notes" class="block text-gray-700 font-bold mb-2">Notes:</label>
-                            <textarea name="notes" id="notes" rows="3"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter notes">{{ old('notes') }}</textarea>
-                        </div>
-
-                        {{-- Submit Button --}}
-                        <div class="flex items-center justify-end">
-                            <a href="{{ route('medical-records.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
-                                Cancel
-                            </a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Create Record
-                            </button>
-                        </div>
-
-                    </form>
-                    
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan Tambahan (Opsional)</label>
+                    <textarea id="notes" name="notes" rows="3" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" placeholder="Misal: Pasien diminta kembali jika ada keluhan">{{ old('notes') }}</textarea>
+                    @error('notes')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
-        </div>
+
+            <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
+                <a href="{{ route('medical-records.index') }}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">
+                    Batal
+                </a>
+                <button type="submit" class="px-4 py-2 bg-[#009688] text-white rounded-lg shadow-sm hover:bg-[#00796b] transition duration-150">
+                    Simpan
+                </button>
+            </div>
+        </form>
     </div>
 </x-app-layout>

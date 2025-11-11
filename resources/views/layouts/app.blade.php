@@ -11,74 +11,126 @@
 
     {{-- ================= HEADER ================= --}}
     <header class="flex justify-between items-center py-4 px-8 bg-white shadow-sm border-b border-gray-100">
-        {{-- Logo --}}
-        <div class="flex items-center space-x-2">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Logo_of_Universitas_Negeri_Semarang.jpg/960px-Logo_of_Universitas_Negeri_Semarang.jpg"
-                 alt="Logo" class="h-6">
-            <span class="font-semibold text-gray-800">PONDOK UNNES</span>
-        </div>
-
-        {{-- Navigation --}}
-        <nav class="flex items-center space-x-6 text-sm">
-            <a href="{{ route('doctors.searchPage') }}" class="text-gray-700 hover:text-[#009688] transition">Cari Dokter</a>
-
-            {{-- ======= DROPDOWN USER ======= --}}
-            @auth
-                @php
-                    $user = Auth::user();
-                    if ($user->id_role == 1) {
-                        $profileRoute = route('profile.show'); // admin
-                    } elseif ($user->id_role == 2) {
-                        $profileRoute = route('profile.show'); // doctor
-                    } elseif ($user->id_role == 3) {
-                        $profileRoute = route('profile.show'); // patient
-                    } else {
-                        $profileRoute = '#';
-                    }
-                @endphp
-
-                <div class="relative">
-                    <button id="userMenuButton"
-                        class="flex items-center space-x-2 text-gray-700 font-medium focus:outline-none">
-                        <div class="w-7 h-7 rounded-full bg-[#009688] text-white flex items-center justify-center text-sm">
-                            {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
-                        </div>
-                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
-                             viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-
-                    {{-- Dropdown --}}
-                    <div id="userDropdown"
-                        class="absolute right-0 mt-2 bg-white rounded-md shadow-lg border border-gray-100 w-40 hidden z-50 transition ease-out duration-150">
-                        <a href="{{ $profileRoute }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            Profil
-                        </a>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100">
-                                Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @else
-                <a href="{{ route('login') }}"
-                   class="bg-[#009688] text-white px-4 py-1 rounded-full text-sm hover:bg-[#00796b] transition">
-                   Masuk / Daftar
-                </a>
-            @endauth
-        </nav>
+        {{-- ... (Kode Header Anda ... tidak berubah) ... --}}
     </header>
 
-    {{-- ================= MAIN CONTENT ================= --}}
-    <main class="flex-1 py-8 px-6 max-w-7xl mx-auto w-full">
-        {{ $slot ?? '' }}
-        @yield('content')
-    </main>
+    {{-- ================= MAIN CONTENT (Layout 2 Kolom) ================= --}}
+    <div class="flex-1 w-full max-w-7xl mx-auto flex py-8 px-6 space-x-6">
+            
+        {{-- ==================== KOLOM SIDEBAR KIRI ==================== --}}
+        @auth
+            <aside class="w-1/4">
+                <div class="bg-white rounded-lg shadow-sm p-4 sticky top-8">
+                    <nav class="space-y-1">
+                        @php
+                            $user = Auth::user()->loadMissing('role');
+                            $userRole = $user->role->role_name ?? null;
+                        @endphp
+
+                        {{-- ==================== --}}
+                        {{--       MENU ADMIN     --}}
+                        {{-- ==================== --}}
+                        @if ($userRole == 'Admin')
+                            <a href="{{ route('dashboard') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('dashboard') ? 'bg-[#009688] text-white' : '' }}">
+                                Dashboard
+                            </a>
+                            <a href="{{ route('doctors.index') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('doctors.*') ? 'bg-[#009688] text-white' : '' }}">
+                                Manajemen Dokter
+                            </a>
+                            <a href="{{ route('patients.index') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('patients.*') ? 'bg-[#009688] text-white' : '' }}">
+                                Manajemen Pasien
+                            </a>
+                            <a href="{{ route('admin.appointments.index') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.appointments.*') ? 'bg-[#009688] text-white' : '' }}">
+                                Manajemen Janji Temu
+                            </a>
+                            
+                            {{-- !! LINK ADMIN BARU !! --}}
+                            <div class="pt-2 mt-2 border-t">
+                                <h3 class="px-4 pt-2 text-xs font-semibold text-gray-400 uppercase">Master Data</h3>
+                                <a href="{{ route('medical-records.index') }}" 
+                                   class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('medical-records.*') ? 'bg-[#009688] text-white' : '' }}">
+                                    Manajemen Rekam Medis
+                                </a>
+                                <a href="{{ route('prescriptions.index') }}" 
+                                   class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('prescriptions.*') ? 'bg-[#009688] text-white' : '' }}">
+                                    Manajemen Resep Obat
+                                </a>
+                                 <a href="{{ route('payments.index') }}" 
+                                   class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('payments.*') ? 'bg-[#009688] text-white' : '' }}">
+                                    Manajemen Pembayaran
+                                </a>
+                            </div>
+                            
+                            {{-- !! LINK ADMIN BARU !! --}}
+                            <div class="pt-2 mt-2 border-t">
+                                <h3 class="px-4 pt-2 text-xs font-semibold text-gray-400 uppercase">Pengaturan</h3>
+                                <a href="{{ route('user-roles.index') }}" 
+                                   class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('user-roles.*') ? 'bg-[#009688] text-white' : '' }}">
+                                    Manajemen Roles
+                                </a>
+                                <a href="{{ route('permissions.index') }}" 
+                                   class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('permissions.*') ? 'bg-[#009688] text-white' : '' }}">
+                                    Manajemen Permissions
+                                </a>
+                                <a href="{{ route('profile.show') }}" 
+                                   class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('profile.show') ? 'bg-[#009688] text-white' : '' }}">
+                                    Profil Saya
+                                </a>
+                            </div>
+
+                        {{-- ==================== --}}
+                        {{--      MENU DOKTER     --}}
+                        {{-- ==================== --}}
+                        @elseif ($userRole == 'Doctor')
+                            <a href="{{ route('dashboard') }}" class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('dashboard') ? 'bg-[#009688] text-white' : '' }}">
+                                Dashboard Dokter
+                            </a>
+                            {{-- Tambahkan link Dokter lain di sini jika perlu --}}
+                            <a href="{{ route('profile.show') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('profile.show') ? 'bg-[#009688] text-white' : '' }}">
+                                Profil Saya
+                            </a>
+
+                        {{-- ==================== --}}
+                        {{--      MENU PASIEN     --}}
+                        {{-- ==================== --}}
+                        @elseif ($userRole == 'Patient')
+                            <a href="{{ route('appointments.my') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('appointments.my') ? 'bg-[#009688] text-white' : '' }}">
+                                Jadwal Konsultasi
+                            </a>
+                            <a href="{{ route('patient.records') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('patient.records') ? 'bg-[#009688] text-white' : '' }}">
+                                Riwayat Medis
+                            </a>
+                            
+                            {{-- !! LINK PASIEN BARU !! --}}
+                            <a href="{{ route('patient.prescriptions') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('patient.prescriptions') ? 'bg-[#009688] text-white' : '' }}">
+                                Kelola Resep Obat
+                            </a>
+                            
+                            <a href="{{ route('profile.show') }}" 
+                               class="block px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 {{ request()->routeIs('profile.show') ? 'bg-[#009688] text-white' : '' }}">
+                                Profil Saya
+                            </a>
+                        @endif
+                        
+                    </nav>
+                </div>
+            </aside>
+        @endauth
+
+        {{-- ==================== KOLOM KONTEN UTAMA ==================== --}}
+        <main class="@auth w-3/4 @else w-full @endauth">
+            {{ $slot ?? '' }}
+            @yield('content')
+        </main>
+    </div>
 
     {{-- ================= FOOTER ================= --}}
     <footer class="bg-white border-t border-gray-100 text-center py-4 text-xs text-gray-500 mt-auto">
@@ -91,20 +143,16 @@
         const button = document.getElementById('userMenuButton');
         const dropdown = document.getElementById('userDropdown');
 
-        // Toggle dropdown saat tombol diklik
         button?.addEventListener('click', function (e) {
             e.stopPropagation();
             dropdown.classList.toggle('hidden');
         });
-
-        // Tutup dropdown saat klik di luar
         document.addEventListener('click', function (e) {
-            if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+            if (button && dropdown && !button.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.add('hidden');
             }
         });
     });
     </script>
-
 </body>
 </html>

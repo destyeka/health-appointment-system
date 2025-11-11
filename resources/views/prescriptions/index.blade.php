@@ -1,91 +1,61 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Manajemen Resep Obat</h1>
+        <a href="{{ route('prescriptions.create') }}" class="px-4 py-2 bg-[#009688] text-white rounded-lg shadow-sm hover:bg-[#00796b] transition duration-150">
+            Tambah Resep
+        </a>
+    </div>
 
-            {{-- Judul + Tombol Add New Role --}}
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __("Daftar Prescription") }}
-                </h2>
-                <a href="{{ route('prescriptions.create') }}" 
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Add New Prescription
-                </a>
-            </div>
-
-            {{-- Notifikasi sukses / error --}}
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            {{-- Card untuk tabel --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    @if($prescriptions->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medication Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosage</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequency</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($prescriptions as $prescription)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $prescription->id_record }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $prescription->medication_name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $prescription->dosage }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $prescription->frequency }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $prescription->duration }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('prescriptions.show', $prescription) }}" class="text-green-600 hover:text-green-900 mr-3">View</a>
-                                                <a href="{{ route('prescriptions.edit', $prescription) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                                <form action="{{ route('prescriptions.destroy', $prescription) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this prescription?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {{-- Pagination --}}
-                        <div class="mt-4">
-                            {{ $prescriptions->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-8">
-                            <p class="text-gray-500">No medica$prescriptions found.</p>
-                            <a href="{{ route('medica$prescriptions.create') }}" class="text-blue-500 hover:text-blue-700">Create your first prescription.</a>
-                        </div>
-                    @endif
-                </div>
-            </div>
+    @if (session('success'))
+        <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+            {{ session('success') }}
         </div>
+    @endif
+
+    <div class="space-y-4">
+        @forelse ($prescriptions as $prescription)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <div class="flex flex-col md:flex-row justify-between md:items-center">
+                    <div class="flex-1 mb-4 md:mb-0">
+                        <h2 class="text-lg font-semibold text-gray-900">{{ $prescription->medication_name }}</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Pasien: <strong>{{ $prescription->medicalRecord->appointment->patient->name ?? 'N/A' }}</strong>
+                        </p>
+                        <div class="flex space-x-4 mt-2 text-sm text-gray-500">
+                            <span>
+                                🗓️ {{ \Carbon\Carbon::parse($prescription->prescribed_at)->translatedFormat('d F Y') }}
+                            </span>
+                            <span>
+                                Dosis: <strong>{{ $prescription->dosage }}</strong>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-shrink-0 flex flex-col md:flex-row md:items-center md:space-x-2 space-y-2 md:space-y-0">
+                        <a href="{{ route('prescriptions.show', $prescription) }}" class="px-3 py-2 text-sm font-medium text-center text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
+                            Lihat
+                        </a>
+                        <a href="{{ route('prescriptions.edit', $prescription) }}" class="px-3 py-2 text-sm font-medium text-center text-indigo-700 bg-indigo-100 rounded-lg hover:bg-indigo-200">
+                            Edit
+                        </a>
+                        <form action="{{ route('prescriptions.destroy', $prescription) }}" method="POST" class="inline" onsubmit="return confirm('Hapus resep ini?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="w-full md:w-auto px-3 py-2 text-sm font-medium text-center text-red-700 bg-red-100 rounded-lg hover:bg-red-200">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 text-center">
+                <p class="text-gray-500">Tidak ada data resep obat.</p>
+            </div>
+        @endforelse
+    </div>
+
+    <div class="mt-6">
+        {{ $prescriptions->links() }}
     </div>
 </x-app-layout>

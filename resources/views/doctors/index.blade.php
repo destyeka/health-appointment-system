@@ -1,83 +1,64 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Manajemen Dokter</h1>
+        <a href="{{ route('doctors.create') }}" class="px-4 py-2 bg-[#009688] text-white rounded-lg shadow-sm hover:bg-[#00796b] transition duration-150">
+            Tambah Dokter
+        </a>
+    </div>
 
-            {{-- Judul + Tombol Add New Role --}}
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __("Daftar Dokter") }}
-                </h2>
-                <a href="{{ route('doctors.create') }}" 
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Add New Doctor
-                </a>
-            </div>
-
-            {{-- Notifikasi sukses / error --}}
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            {{-- Card untuk tabel --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    @if($doctors->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($doctors as $doctor)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $doctor->name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $doctor->specialty }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $doctor->phone }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('doctors.show', $doctor) }}" class="text-green-600 hover:text-green-900 mr-3">View</a>
-                                                <a href="{{ route('doctors.edit', $doctor) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                                <form action="{{ route('doctors.destroy', $doctor) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this role?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {{-- Pagination --}}
-                        <div class="mt-4">
-                            {{ $doctors->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-8">
-                            <p class="text-gray-500">No doctors found.</p>
-                            <a href="{{ route('doctors.create') }}" class="text-blue-500 hover:text-blue-700">Create your first role</a>
-                        </div>
-                    @endif
-                </div>
-            </div>
+    @if (session('success'))
+        <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+            {{ session('success') }}
         </div>
+    @endif
+
+    <div class="space-y-4">
+        
+        @forelse ($doctors as $doctor)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <div class="flex flex-col md:flex-row justify-between md:items-center">
+                    
+                    <div class="flex-1 mb-4 md:mb-0">
+                        <h2 class="text-lg font-semibold text-gray-900">{{ $doctor->name }}</h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            {{ $doctor->specialty }}
+                        </p>
+                        <div class="flex space-x-4 mt-2 text-sm text-gray-500">
+                            <span>
+                                📞 {{ $doctor->phone }}
+                            </span>
+                            <span>
+                                📧 {{ $doctor->user->email ?? 'N/A' }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-shrink-0 flex flex-col md:flex-row md:items-center md:space-x-2 space-y-2 md:space-y-0">
+                        <a href="{{ route('doctors.show', $doctor) }}" class="px-3 py-2 text-sm font-medium text-center text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
+                            Lihat
+                        </a>
+                        <a href="{{ route('doctors.edit', $doctor) }}" class="px-3 py-2 text-sm font-medium text-center text-indigo-700 bg-indigo-100 rounded-lg hover:bg-indigo-200">
+                            Edit
+                        </a>
+                        <form action="{{ route('doctors.destroy', $doctor) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus dokter ini?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="w-full md:w-auto px-3 py-2 text-sm font-medium text-center text-red-700 bg-red-100 rounded-lg hover:bg-red-200">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 text-center">
+                <p class="text-gray-500">Tidak ada data dokter.</p>
+            </div>
+        @endforelse
+    </div>
+
+    <div class="mt-6">
+        {{ $doctors->links() }}
     </div>
 </x-app-layout>

@@ -1,87 +1,67 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Manajemen Rekam Medis</h1>
+        <a href="{{ route('medical-records.create') }}" class="px-4 py-2 bg-[#009688] text-white rounded-lg shadow-sm hover:bg-[#00796b] transition duration-150">
+            Tambah Rekam Medis
+        </a>
+    </div>
 
-            {{-- Judul + Tombol Add New Role --}}
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __("Daftar Medical Record") }}
-                </h2>
-                <a href="{{ route('medical-records.create') }}" 
-                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Add New Medical Record
-                </a>
-            </div>
-
-            {{-- Notifikasi sukses / error --}}
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            {{-- Card untuk tabel --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    @if($medical_records->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointment</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diagnosis</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Treatment</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($medical_records as $medical_record)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ $medical_record->id_appointment }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $medical_record->diagnosis }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $medical_record->treatment }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $medical_record->notes }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('medical-records.show', $medical_record) }}" class="text-green-600 hover:text-green-900 mr-3">View</a>
-                                                <a href="{{ route('medical-records.edit', $medical_record) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                                <form action="{{ route('medical-records.destroy', $medical_record) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this medical_record?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {{-- Pagination --}}
-                        <div class="mt-4">
-                            {{ $medical_records->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-8">
-                            <p class="text-gray-500">No medica$medical_records found.</p>
-                            <a href="{{ route('medica$medical_records.create') }}" class="text-blue-500 hover:text-blue-700">Create your first medical_record.</a>
-                        </div>
-                    @endif
-                </div>
-            </div>
+    @if (session('success'))
+        <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+            {{ session('success') }}
         </div>
+    @endif
+
+    <div class="space-y-4">
+        
+        @forelse ($medical_records as $record)
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <div class="flex flex-col md:flex-row justify-between md:items-center">
+                    
+                    <div class="flex-1 mb-4 md:mb-0">
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            {{ $record->appointment->patient->name ?? 'Pasien Dihapus' }}
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Konsultasi dengan 
+                            <strong>{{ $record->appointment->doctorSchedule->doctor->name ?? 'Dokter Dihapus' }}</strong>
+                        </p>
+                        <div class="flex space-x-4 mt-2 text-sm text-gray-500">
+                            <span>
+                                🗓️ {{ \Carbon\Carbon::parse($record->appointment->appointment_date)->translatedFormat('d F Y') }}
+                            </span>
+                            <span>
+                                Diagnosis: <strong>{{ $record->diagnosis }}</strong>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-shrink-0 flex flex-col md:flex-row md:items-center md:space-x-2 space-y-2 md:space-y-0">
+                        <a href="{{ route('medical-records.show', $record) }}" class="px-3 py-2 text-sm font-medium text-center text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
+                            Lihat
+                        </a>
+                        <a href="{{ route('medical-records.edit', $record) }}" class="px-3 py-2 text-sm font-medium text-center text-indigo-700 bg-indigo-100 rounded-lg hover:bg-indigo-200">
+                            Edit
+                        </a>
+                        <form action="{{ route('medical-records.destroy', $record) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus rekam medis ini?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="w-full md:w-auto px-3 py-2 text-sm font-medium text-center text-red-700 bg-red-100 rounded-lg hover:bg-red-200">
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 text-center">
+                <p class="text-gray-500">Tidak ada data rekam medis.</p>
+            </div>
+        @endforelse
+    </div>
+
+    <div class="mt-6">
+        {{ $medical_records->links() }}
     </div>
 </x-app-layout>

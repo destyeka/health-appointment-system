@@ -1,95 +1,76 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Update Prescription') }}
-        </h2>
-    </x-slot>
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Edit Resep Obat</h1>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    
-                    {{-- Tampilkan Error Validation --}}
-                    @if ($errors->any())
-                        <div class="mb-4">
-                            <ul class="list-disc list-inside text-red-600">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <form action="{{ route('prescriptions.update', $prescription) }}" method="POST">
+            @csrf
+            @method('PUT')
+            
+            <div class="space-y-6">
+                <div>
+                    <label for="id_record" class="block text-sm font-medium text-gray-700 mb-1">Rekam Medis (Pasien - Dokter - Tgl)</label>
+                    <select id="id_record" name="id_record" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                        <option value="" disabled>Pilih rekam medis...</option>
+                        @foreach ($records as $record)
+                            <option value="{{ $record->id_medical_record }}" {{ old('id_record', $prescription->id_record) == $record->id_medical_record ? 'selected' : '' }}>
+                                {{ $record->appointment->patient->name }} - (Dr. {{ $record->appointment->doctorSchedule->doctor->name }}) - {{ $record->diagnosis }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('id_record')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                    <form action="{{ route('prescriptions.update', $prescription) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                <div>
+                    <label for="prescribed_at" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Resep Dibuat</label>
+                    <input type="date" id="prescribed_at" name="prescribed_at" value="{{ old('prescribed_at', $prescription->prescribed_at) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                    @error('prescribed_at')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                        {{-- Doctor Email --}}
-                        <div class="mb-4">
-                            <label for="id_record" class="block text-gray-700 font-bold mb-2">Record</label>
-                            <select name="id_record" id="id_record"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter doctor name">
-                                   <option value="{{ $prescription->id_record }}">{{ $prescription->id_record }}</option>
-                                   @foreach ($records as $record)
-                                       <option value="{{ $record->id_record }}">
-                                        {{ $record->id_record }}
-                                       </option>
-                                   @endforeach
-                            </select>
-                        </div>
-
-                        {{-- Doctor Specialty --}}
-                        <div class="mb-4">
-                            <label for="medication_name" class="block text-gray-700 font-bold mb-2">Medication Name</label>
-                            <input type="text" name="medication_name" id="medication_name" value="{{ old('medication_name', $prescription->medication_name) }}"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter medication_name">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="dosage" class="block text-gray-700 font-bold mb-2">Dosage</label>
-                            <input type="text" name="dosage" id="dosage" value="{{ old('dosage', $prescription->dosage) }}"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter dosage">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="frequency" class="block text-gray-700 font-bold mb-2">Frequency</label>
-                            <input type="text" name="frequency" id="frequency" value="{{ old('frequency', $prescription->frequency) }}"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter frequency">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="duration" class="block text-gray-700 font-bold mb-2">Duration</label>
-                            <input type="text" name="duration" id="duration" value="{{ old('duration', $prescription->duration) }}"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter duration">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="prescribed_at" class="block text-gray-700 font-bold mb-2">Prescribed At</label>
-                            <input type="datetime-local" name="prescribed_at" id="prescribed_at"  value="{{ old('prescribed_at', Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter prescribed_at" readonly>
-                        </div>
-
-                        {{-- Submit Button --}}
-                        <div class="flex items-center justify-end">
-                            <a href="{{ route('prescriptions.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">
-                                Cancel
-                            </a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Create Prescription
-                            </button>
-                        </div>
-
-                    </form>
-                    
+                <div>
+                    <label for="medication_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Obat</label>
+                    <input type="text" id="medication_name" name="medication_name" value="{{ old('medication_name', $prescription->medication_name) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                    @error('medication_name')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="dosage" class="block text-sm font-medium text-gray-700 mb-1">Dosis</label>
+                        <input type="text" id="dosage" name="dosage" value="{{ old('dosage', $prescription->dosage) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                        @error('dosage')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="frequency" class="block text-sm font-medium text-gray-700 mb-1">Frekuensi</label>
+                        <input type="text" id="frequency" name="frequency" value="{{ old('frequency', $prescription->frequency) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                        @error('frequency')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
+                        <input type="text" id="duration" name="duration" value="{{ old('duration', $prescription->duration) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                        @error('duration')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
+                <a href="{{ route('prescriptions.index') }}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">
+                    Batal
+                </a>
+                <button type="submit" class="px-4 py-2 bg-[#009688] text-white rounded-lg shadow-sm hover:bg-[#00796b] transition duration-150">
+                    Update
+                </button>
+            </div>
+        </form>
     </div>
 </x-app-layout>

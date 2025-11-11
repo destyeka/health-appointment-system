@@ -19,20 +19,27 @@ class ProfileController extends Controller
     public function show(): View
     {
         $user = Auth::user();
+        $user->loadMissing('role'); // Pastikan role di-load
 
-        if ($user->id_role == 1) {
+        if ($user->role->role_name == 'Admin') {
             // Admin
             return view('profile.admin', compact('user'));
-        } elseif ($user->id_role == 2) {
+            
+        } elseif ($user->role->role_name == 'Doctor') {
             // Doctor
-            $doctor = Doctor::where('id_user', $user->id_role)->first();
+            // !! PERBAIKAN BUG DI SINI ( $user->id_user BUKAN $user->id_role ) !!
+            $doctor = Doctor::where('id_user', $user->id_user)->first();
             return view('profile.doctor', compact('user', 'doctor'));
-        } elseif ($user->id_role == 3) {
+            
+        } elseif ($user->role->role_name == 'Patient') {
             // Patient
-            $patient = Patient::where('id_user', $user->id_role)->first();
+            // !! PERBAIKAN BUG DI SINI ( $user->id_user BUKAN $user->id_role ) !!
+            $patient = Patient::where('id_user', $user->id_user)->first();
             return view('profile.patient', compact('user', 'patient'));
+            
         } else {
-            abort(403, 'Role tidak dikenali.');
+            // Fallback jika user tidak punya role
+             return view('profile.admin', compact('user'));
         }
     }
 

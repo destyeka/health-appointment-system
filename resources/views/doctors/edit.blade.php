@@ -1,95 +1,59 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Edit Dokter</h1>
 
-            {{-- Judul --}}
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-6">
-                Edit Doctor: {{ $doctor->name ?? 'N/A' }}
-            </h2>
-
-            {{-- Notifikasi --}}
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <form action="{{ route('doctors.update', $doctor) }}" method="POST">
+            @csrf
+            @method('PUT') <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="id_user" class="block text-sm font-medium text-gray-700 mb-1">Email Akun</label>
+                    <select id="id_user" name="id_user" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                        <option value="{{ $doctor->id_user }}" selected>{{ $doctor_email }} (Saat ini)</option>
+                        
+                        @foreach ($available_users as $user)
+                            <option value="{{ $user->id_user }}" {{ old('id_user') == $user->id_user ? 'selected' : '' }}>
+                                {{ $user->email }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('id_user')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
-            @endif
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {{ session('error') }}
+
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="name" name="name" value="{{ old('name', $doctor->name) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                    @error('name')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
-            @endif
 
-            {{-- Form Edit --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <form action="{{ route('doctors.update', $doctor) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                <div>
+                    <label for="specialty" class="block text-sm font-medium text-gray-700 mb-1">Spesialisasi</label>
+                    <input type="text" id="specialty" name="specialty" value="{{ old('specialty', $doctor->specialty) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                    @error('specialty')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                        {{-- Doctor Email --}}
-                        <div class="mb-4">
-                            <label for="id_user" class="block text-gray-700 font-bold mb-2">Doctor Email:</label>
-                            <select name="id_user" id="id_user"
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                   placeholder="Enter doctor name">
-                                   <option value="{{ $doctor->id_user }}">{{ $doctor->user->email }}</option>
-                                   @foreach ($available_users as $user)
-                                       <option value="{{ $user->id_user }}">
-                                        {{ $user->email }}
-                                       </option>
-                                   @endforeach
-                            </select>
-                        </div>
-
-                        {{-- Doctor Name --}}
-                        <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="name" id="name"
-                                   value="{{ old('name', $doctor->name) }}"
-                                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            @error('name')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Doctor Specialty --}}
-                        <div class="mb-4">
-                            <label for="specialty" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="specialty" id="specialty"
-                                   value="{{ old('specialty', $doctor->specialty) }}"
-                                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            @error('specialty')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Doctor Phone --}}
-                        <div class="mb-4">
-                            <label for="phone" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="phone" id="phone"
-                                   value="{{ old('phone', $doctor->phone) }}"
-                                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                            @error('phone')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Tombol --}}
-                        <div class="flex space-x-3">
-                            <button type="submit" 
-                                    class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                                Update Doctor
-                            </button>
-                            <a href="{{ route('doctors.show', $doctor) }}" 
-                               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                Cancel
-                            </a>
-                        </div>
-
-                    </form>
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Telepon</label>
+                    <input type="text" id="phone" name="phone" value="{{ old('phone', $doctor->phone) }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-[#009688] focus:ring focus:ring-[#009688] focus:ring-opacity-50" required>
+                    @error('phone')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
-        </div>
+            <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-100">
+                <a href="{{ route('doctors.index') }}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-150">
+                    Batal
+                </a>
+                <button type="submit" class="px-4 py-2 bg-[#009688] text-white rounded-lg shadow-sm hover:bg-[#00796b] transition duration-150">
+                    Update
+                </button>
+            </div>
+        </form>
     </div>
 </x-app-layout>

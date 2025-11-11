@@ -15,73 +15,86 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Di sinilah Anda dapat mendaftarkan rute web untuk aplikasi Anda.
+| Rute-rute ini dimuat oleh RouteServiceProvider dan semuanya akan
+| ditugaskan ke grup middleware "web". Buat sesuatu yang hebat!
+|
+*/
+
+// Rute Halaman Depan (Landing Page)
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
+// Rute Dashboard Utama (Dengan Logika Role)
 Route::get('/dashboard', function () {
 
     // Ambil data user yang sedang login
     $user = Auth::user(); 
 
-    // Muat relasi 'role' jika belum ada (opsional tapi aman)
+    // Muat relasi 'role' jika belum ada
     $user->loadMissing('role'); 
 
     // Cek nama role-nya
     if ($user->role->role_name == 'Admin') {
-
-        // Arahkan Admin ke halaman CRUD (misalnya, daftar dokter)
-        return view('dashboard'); 
+        // Arahkan Admin ke view dashboard admin
+        return view('admin.dashboard'); 
 
     } else if ($user->role->role_name == 'Doctor') {
-
-        // TODO: Arahkan Dokter ke halaman jadwal mereka
-        // (Untuk sekarang, biarkan di dashboard)
-        return view('dashboard'); 
+        // Arahkan Dokter ke view dashboard dokter
+        // GANTI 'doctor.dashboard' JIKA NAMA FILE ANDA BERBEDA
+        return app(DoctorScheduleController::class)->showDoctorDashboard();
 
     } else if ($user->role->role_name == 'Patient') {
-
-        // Arahkan Pasien ke halaman "Cari Dokter" yang baru kita buat
+        // Pasien tidak punya dashboard, arahkan ke halaman utama
         return redirect()->route('landing');
     }
 
-    // Jika rolenya tidak dikenal, tampilkan dashboard default
+    // Fallback jika role tidak dikenal
     return view('dashboard'); 
 
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Grup Rute yang Membutuhkan Autentikasi (User Sudah Login)
 Route::middleware('auth')->group(function () {
+    
+    // == Rute Profil ==
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile-show', [ProfileController::class, 'show'])->name('profile.show'); // Anda punya ini di file app.blade.php
 
-    // == RUTE UNTUK ADMIN (CRUD) ==
-    // Rute resource ini harus di dalam middleware 'auth'
-    Route::resource('user-roles', RoleController::class);
-    Route::resource('permissions', PermissionController::class);
-    // Catatan: Route::resource('doctors', ...) sudah membuat semua rute
-    // doctors.index, doctors.create, doctors.store, dll.
-    // yang digunakan oleh file DoctorController Anda.
-
-    // == RUTE UNTUK PASIEN (FITUR CARI DOKTER) ==
-    
-    // 1. Rute untuk menampilkan halaman (HTML)
-    // Mengarah ke fungsi showSearchPage yang kita buat
+    // == Rute Fitur Pasien ==
     Route::get('/cari-dokter', [DoctorController::class, 'showSearchPage'])
          ->name('doctors.searchPage');
-
-    // 2. Rute untuk API "Fetching" (JSON)
-    // Mengarah ke fungsi searchApi yang kita buat
     Route::get('/doctors-search-api', [DoctorController::class, 'searchApi'])
          ->name('doctors.api.search');
-
     Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
+    Route::get('/appointment/{doctorSchedule}/confirmation', [AppointmentController::class, 'confirm'])->name('appointments.confirmation');
+    Route::post('/appointments/{doctorSchedule}/temp', [AppointmentController::class, 'temp'])->name('appointments.temp');
+    Route::post('/appointments/{doctorSchedule}/process', [AppointmentController::class, 'bookingProcess'])->name('appointments.booking-process');
+    Route::get('/my-appointments', [AppointmentController::class, 'myBookedAppointments'])
+        ->name('appointments.my');
 
+    // == Rute Pembayaran ==
+    Route::get('/payments/{payment_details}/waiting', [PaymentController::class, 'waiting'])->name('payments.waiting');
+    Route::get('/payments/{payment_details}/check-status', [PaymentController::class, 'checkStatus'])->name('payments.check-status');
+    Route::get('/payments/{payment_details}/success', [PaymentController::class, 'success'])->name('payments.success');
 
+    // == RUTE UNTUK ADMIN (Kelola Appointment) ==
+    Route::get('/admin/appointments', [AppointmentController::class, 'adminIndex'])
+        ->name('admin.appointments.index');
+    // Anda sudah memiliki 'appointments.show' dan 'appointments.destroy' di dalam resource di bawah.
 
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    
-
+    // == Rute Resource (CRUD) ==
+    // Ini otomatis membuat rute index, create, store, show, edit, update, destroy
+    Route::resource('user-roles', RoleController::class);
+    Route::resource('permissions', PermissionController::class);
     Route::resource('doctors', DoctorController::class);
     Route::resource('doctor-schedules', DoctorScheduleController::class);
     Route::resource('patients', PatientController::class);
@@ -89,39 +102,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('prescriptions', PrescriptionController::class);
     Route::resource('payments', PaymentController::class);
     Route::resource('appointments', AppointmentController::class);
-    Route::resource('permissions', PermissionController::class);
-
-    Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
-    Route::get('/appointment/{doctorSchedule}/confirmation', [AppointmentController::class, 'confirm'])->name('appointments.confirmation');
-    Route::post('/appointments/{doctorSchedule}/temp', [AppointmentController::class, 'temp'])->name('appointments.temp');
-    Route::post('/appointments/{doctorSchedule}/process', [AppointmentController::class, 'bookingProcess'])->name('appointments.booking-process');
-
-    Route::get('/payments/{payment_details}/waiting', [PaymentController::class, 'waiting'])->name('payments.waiting');
-    Route::get('/payments/{payment_details}/check-status', [PaymentController::class, 'checkStatus'])->name('payments.check-status');
-    Route::get('/payments/{payment_details}/success', [PaymentController::class, 'success'])->name('payments.success');
 
 });
-    // == RUTE UNTUK ADMIN (Kelola Appointment) ==
-    Route::get('/admin/appointments', [AppointmentController::class, 'adminIndex'])
-        ->name('admin.appointments.index');
-    Route::get('/admin/appointments/{id}', [AppointmentController::class, 'show'])->name('appointments.show');
-    Route::delete('/admin/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
+// Rute Webhook (Tanpa CSRF Token)
+Route::post('/webhook/payment', [WebhookController::class, 'handlePayment'])
+     ->name('webhook.payment')
+     ->withoutMiddleware([VerifyCsrfToken::class]);
 
-    Route::middleware(['auth'])->group(function () {
-    Route::get('/my-appointments', [AppointmentController::class, 'myBookedAppointments'])
-        ->name('appointments.my');
-});
-
-// Route::resource('user-roles', RoleController::class)->parameters([
-    //     'user-roles' => 'role'  
-    // ]);
-    
-//     'user-roles' => 'role'  
-// ]);
-
-
-Route::post('/webhook/payment', [WebhookController::class, 'handlePayment'])->name('webhook.payment')->withoutMiddleware([VerifyCsrfToken::class]);
-
+// Rute Autentikasi (Login, Register, dll.)
 require __DIR__.'/auth.php';
-

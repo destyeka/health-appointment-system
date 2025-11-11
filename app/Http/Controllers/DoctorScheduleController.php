@@ -127,4 +127,52 @@ class DoctorScheduleController extends Controller
         return redirect()->route('doctor-schedules.index')->with('success', 'Schedule deleted sucessfully!');
     }
 
+    public function showDoctorDashboard()
+    {
+        // 1. Dapatkan dokter yang sedang login
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $doctor = $user->doctor; // Asumsi relasi 'doctor' ada di model User
+
+        // Jika profil dokter tidak ada, berikan pesan
+        if (!$doctor) {
+            return view('doctor.dashboard-empty');
+        }
+
+        // 2. Tentukan urutan hari
+        $dayOrder = [
+            'Senin' => 1,
+            'Selasa' => 2,
+            'Rabu' => 3,
+            'Kamis' => 4,
+            'Jumat' => 5,
+            'Sabtu' => 6,
+            'Minggu' => 7,
+        ];
+
+        // 3. Ambil jadwal praktik mingguan dokter
+        $weeklySchedules = \App\Models\DoctorSchedule::where('id_doctor', $doctor->id_doctor)
+            ->get()
+            ->sortBy(function ($schedule) use ($dayOrder) {
+                return $dayOrder[$schedule->day] ?? 8; // Urutkan berdasarkan hari
+            });
+
+        // 4. Ambil janji temu hari ini (Hanya yang sudah dibayar)
+        $todayAppointments = \App\Models\Appointment::with(['patient', 'doctorSchedule'])
+            ->where('appointment_date', \Carbon\Carbon::today())
+            ->whereHas('doctorSchedule', function ($query) use ($doctor) {
+                $query->where('id_doctor', $doctor->id_doctor);
+            })
+            ->whereHas('payment', function ($query) {
+                $query->where('booking_is_paid', true);
+            })
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+            
+        // 5. Kirim data ke view
+        return view('doctor.dashboard', compact(
+            'doctor', 
+            'weeklySchedules', 
+            'todayAppointments'
+        ));
+    }
 }
