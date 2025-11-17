@@ -17,6 +17,10 @@ class Appointment extends Model
         'appointment_date',
         'appointment_time',
         'status',
+        'queue_number',
+        'is_called',
+        'called_at',
+        'estimated_wait_minutes',
         'consultation_type'
     ];
 
