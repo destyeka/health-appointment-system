@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
+use App\Services\EstimatedWaitTimeCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
@@ -253,10 +254,14 @@ class AppointmentController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->get();
 
+        // Inisialisasi calculator (15 menit per pasien, 0 menit buffer)
+        $calculator = new EstimatedWaitTimeCalculator(15, 0);
+
         foreach ($appointments as $appointment) {
             // Hitung nomor antrean pasien pada hari & jadwal dokter yang sama
             $allAppointments = \App\Models\Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
                 ->whereDate('appointment_date', $appointment->appointment_date)
+                ->where('status', '!=', 'cancelled')
                 ->orderBy('appointment_time', 'asc')
                 ->get();
 
@@ -266,31 +271,44 @@ class AppointmentController extends Controller
 
             $appointment->queue_number = $queueNumber;
 
-        // Gabungkan tanggal & waktu ke satu variabel datetime (format aman)
+            // Konversi appointment_date dan appointment_time ke format string
+            $appointmentDate = is_object($appointment->appointment_date) 
+                ? $appointment->appointment_date->format('Y-m-d')
+                : (string)$appointment->appointment_date;
+            
+            $appointmentTime = is_object($appointment->appointment_time)
+                ? $appointment->appointment_time->format('H:i:s')
+                : (string)$appointment->appointment_time;
+
+            // Gunakan calculator untuk menghitung estimated wait time
+            $waitTimeData = $calculator->calculateByDateTime(
+                $appointmentDate,
+                $appointmentTime,
+                $queueNumber
+            );
+
+            $appointment->estimated_wait_data = $waitTimeData;
+            $appointment->estimated_wait_text = $waitTimeData['text'];
+
+            // Tentukan status berdasarkan appointment time
             try {
-            // Pastikan format sesuai dengan kolom di database (date + time)
-                $appointmentDateTime = \Carbon\Carbon::parse(
-                    $appointment->appointment_date . ' ' . $appointment->appointment_time
-                );
+                $appointmentDateTime = \Carbon\Carbon::parse($appointmentDate . ' ' . $appointmentTime);
             } catch (\Exception $e) {
-                // Jika format tidak sesuai, fallback agar tidak error
-                $appointmentDateTime = \Carbon\Carbon::parse($appointment->appointment_date);
+                $appointmentDateTime = \Carbon\Carbon::parse($appointmentDate);
             }
 
             $now = \Carbon\Carbon::now();
+            $minutesUntilAppointment = $now->diffInMinutes($appointmentDateTime, false);
 
-            // Hitung selisih waktu dalam menit
-            $diffMinutes = $now->diffInMinutes($appointmentDateTime, false);
-
-            if ($diffMinutes > 0) {
-                $appointment->estimated_wait_minutes = $diffMinutes;
-                $appointment->estimated_wait_text = $diffMinutes . ' menit lagi';
-            } elseif ($diffMinutes <= 0 && $diffMinutes > -15) {
-                $appointment->estimated_wait_minutes = 0;
-                $appointment->estimated_wait_text = 'Sedang berlangsung';
+            if ($minutesUntilAppointment > 0) {
+                // Belum waktunya appointment
+                $appointment->status_display = 'Dijadwalkan';
+            } elseif ($minutesUntilAppointment <= 0 && $minutesUntilAppointment > -60) {
+                // Appointment sudah dimulai (dalam 1 jam terakhir)
+                $appointment->status_display = $appointment->status === 'on_going' ? 'Sedang Berlangsung' : 'Proses Konsultasi';
             } else {
-                $appointment->estimated_wait_minutes = 0;
-                $appointment->estimated_wait_text = 'Selesai / Terlewat';
+                // Appointment sudah terlewat 1 jam atau lebih
+                $appointment->status_display = $appointment->status === 'finished' ? 'Selesai' : 'Terlewat';
             }
         }
 
