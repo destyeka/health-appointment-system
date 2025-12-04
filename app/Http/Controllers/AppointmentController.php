@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Carbon\CarbonInterval;
 
 class AppointmentController extends Controller
 {
@@ -281,10 +282,11 @@ class AppointmentController extends Controller
 
             // Hitung selisih waktu dalam menit
             $diffMinutes = $now->diffInMinutes($appointmentDateTime, false);
+            $minutesFormatted = CarbonInterval::minutes($diffMinutes)->cascade()->forHumans(['short'=> true]);
 
             if ($diffMinutes > 0) {
-                $appointment->estimated_wait_minutes = $diffMinutes;
-                $appointment->estimated_wait_text = $diffMinutes . ' menit lagi';
+                $appointment->estimated_wait_minutes = $minutesFormatted;
+                $appointment->estimated_wait_text = $minutesFormatted . ' menit lagi';
             } elseif ($diffMinutes <= 0 && $diffMinutes > -15) {
                 $appointment->estimated_wait_minutes = 0;
                 $appointment->estimated_wait_text = 'Sedang berlangsung';

@@ -1,3 +1,7 @@
+@php
+    use Carbon\CarbonInterval;
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -64,7 +68,11 @@
                                         {{ $appointment->queue_number ?? '-' }}
                                     </td>
                                     <td class="px-4 py-2 text-center">
-                                        {{ $appointment->estimated_wait_text ?? '-' }}
+                                        @if(is_numeric($appointment->estimated_wait_text))
+                                            {{ CarbonInterval::minutes($appointment->estimated_wait_text ?? '-')->cascade()->forHumans(['short' => true]) }}
+                                        @else
+                                            {{ $appointment->estimated_wait_text }}
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
