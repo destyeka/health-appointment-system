@@ -9,23 +9,41 @@ class DoctorSchedule extends Model
 {
     use HasFactory;
 
+    /**
+     * Nama tabel yang terhubung dengan model.
+     */
+    protected $table = 'doctor_schedules';
+
+    /**
+     * Primary key untuk tabel.
+     */
+    protected $primaryKey = 'id_doctor_schedule';
+
+    /**
+     * Kolom yang diizinkan untuk diisi.
+     */
     protected $fillable = [
         'id_doctor',
         'day',
-        'time',
+        'start_time',
+        'end_time',
         'patient_slot'
     ];
 
     protected $casts = [
-        'time' => 'time',
-        'patient_slot' => 'integer'
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
     ];
 
-    public function doctor() {
-        return $this->belongsTo(Doctor::class, 'id_doctor', 'id_doctor');
-    }
 
-    public function appointments() {
-        return $this->hasMany(Appointment::class, 'id_doctor_schedule');
+    /**
+     * Menentukan apakah model harus mencatat timestamps (created_at, updated_at).
+     * Tabel Anda tidak memilikinya, jadi kita set ke false.
+     */
+    public $timestamps = false;
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class, 'id_doctor', 'id_doctor');
     }
 }

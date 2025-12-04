@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use App\Models\User;
+use App\Models\Appointment;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class PatientController extends Controller
 {
@@ -21,7 +23,7 @@ class PatientController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     */ 
+     */
     public function create()
     {
         $available_users = User::whereHas('role', function ($query) {
@@ -115,5 +117,18 @@ class PatientController extends Controller
     {
         $patient->delete();
         return redirect()->route('patients.index')->with('success', 'Patient deleted successfully!');
+    }
+    public function myBookedAppointments()
+    {
+        $userId = Auth::id();
+
+        $appointments = Appointment::with('doctorSchedule.doctor', 'payment')
+            ->where('id_patient', $userId) // sesuaikan dengan kolom DB
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+
+        return view('appointments.my_booked_appointments', compact('appointments'));
     }
 }

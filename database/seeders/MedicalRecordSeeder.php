@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Seeder;
 use App\Models\MedicalRecord; // panggil modelnya
 
