@@ -75,23 +75,36 @@ class AppointmentController extends Controller
     {
         // Validasi input dari form
         $request->validate([
-            'patient_id' => 'required|exists:patients,patient_id',
-            'doctor_id' => 'required|exists:doctors,doctor_id',
-            'date_of_appointment' => 'required|date|after_or_equal:now',
-            'time_of_appointment' => 'required|date_format:H:i',
+            'id_patient' => 'required|exists:patients,id_patient',
+            'id_doctor_schedule' => 'required|exists:doctor_schedules,id',
         ]);
 
-        // Membuat data janji temu baru
+        // Ambil jadwal dokter yang dipilih
+        $schedule = DoctorSchedule::with('doctor')->findOrFail($request->id_doctor_schedule);
+
+        // Hitung nomor antrean terakhir untuk jadwal ini
+        $lastQueueNumber = Appointment::where('id_doctor_schedule', $schedule->id)->max('queue_number');
+        $nextQueueNumber = $lastQueueNumber ? $lastQueueNumber + 1 : 1;
+
+        // Estimasi waktu tunggu (misal 15 menit per pasien)
+        $estimatedWaitMinutes = ($nextQueueNumber - 1) * 15;
+        $estimatedWaitTime = date('H:i', strtotime($schedule->start_time . " +{$estimatedWaitMinutes} minutes"));
+
+        // Simpan data janji temu baru
         Appointment::create([
-            'id_patient' => $request->patient_id,
-            'doctor_id' => $request->doctor_id,
-            'date_of_appointment' => $request->date_of_appointment,
-            'time_of_appointment' => $request->time_of_appointment,
+            'id_patient' => $request->id_patient,
+            'id_doctor_schedule' => $schedule->id,
+            'appointment_date' => $schedule->date,
+            'appointment_time' => $schedule->start_time,
+            'queue_number' => $nextQueueNumber,
+            'estimated_wait_time' => $estimatedWaitTime,
             'status' => 'scheduled',
         ]);
 
-        return redirect()->route('appointments.index')->with('success', 'Janji temu berhasil dijadwalkan!');
+        return redirect()->route('appointments.myBookedAppointments')
+            ->with('success', "Janji temu berhasil dijadwalkan! Nomor antrean Anda: {$nextQueueNumber}");
     }
+
 
     public function temp(Request $request, DoctorSchedule $doctorSchedule)
     {
@@ -225,14 +238,64 @@ class AppointmentController extends Controller
     {
         $userId = Auth::id();
 
-        $appointments = Appointment::with('doctorSchedule.doctor', 'payment')
-            ->where('id_patient', $userId)
-            ->where('status', '!=', 'cancelled') // hanya yang aktif/dibooking
+        // Cari data pasien berdasarkan id_user
+        $patient = \App\Models\Patient::where('id_user', $userId)->first();
+
+        if (!$patient) {
+            return redirect()->route('dashboard')->with('error', 'Data pasien tidak ditemukan.');
+        }
+
+        // Ambil semua appointment aktif milik pasien
+        $appointments = \App\Models\Appointment::with('doctorSchedule.doctor', 'payment')
+            ->where('id_patient', $patient->id_patient)
+            ->where('status', '!=', 'cancelled')
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
 
+        foreach ($appointments as $appointment) {
+            // Hitung nomor antrean pasien pada hari & jadwal dokter yang sama
+            $allAppointments = \App\Models\Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
+                ->whereDate('appointment_date', $appointment->appointment_date)
+                ->orderBy('appointment_time', 'asc')
+                ->get();
+
+            $queueNumber = $allAppointments->search(function ($a) use ($appointment) {
+                return $a->id_appointment == $appointment->id_appointment;
+            }) + 1;
+
+            $appointment->queue_number = $queueNumber;
+
+        // Gabungkan tanggal & waktu ke satu variabel datetime (format aman)
+            try {
+            // Pastikan format sesuai dengan kolom di database (date + time)
+                $appointmentDateTime = \Carbon\Carbon::parse(
+                    $appointment->appointment_date . ' ' . $appointment->appointment_time
+                );
+            } catch (\Exception $e) {
+                // Jika format tidak sesuai, fallback agar tidak error
+                $appointmentDateTime = \Carbon\Carbon::parse($appointment->appointment_date);
+            }
+
+            $now = \Carbon\Carbon::now();
+
+            // Hitung selisih waktu dalam menit
+            $diffMinutes = $now->diffInMinutes($appointmentDateTime, false);
+
+            if ($diffMinutes > 0) {
+                $appointment->estimated_wait_minutes = $diffMinutes;
+                $appointment->estimated_wait_text = $diffMinutes . ' menit lagi';
+            } elseif ($diffMinutes <= 0 && $diffMinutes > -15) {
+                $appointment->estimated_wait_minutes = 0;
+                $appointment->estimated_wait_text = 'Sedang berlangsung';
+            } else {
+                $appointment->estimated_wait_minutes = 0;
+                $appointment->estimated_wait_text = 'Selesai / Terlewat';
+            }
+        }
+
         return view('appointments.my_booked_appointments', compact('appointments'));
     }
+
 
 }

@@ -84,9 +84,9 @@
                                     {{-- Status Pembayaran --}}
                                     <td class="px-4 py-2 border text-center">
                                         @if ($appointment->payment?->booking_is_paid)
-                                            <span class="text-green-600 font-semibold">Sudah Dibayar</span>
+                                            <span class="text-green-600 font-semibold">Paid</span>
                                         @else
-                                            <span class="text-red-600 font-semibold">Belum Dibayar</span>
+                                            <span class="text-red-600 font-semibold">Unpaid</span>
                                         @endif
                                     </td>
 
