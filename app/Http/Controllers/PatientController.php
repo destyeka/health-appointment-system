@@ -85,6 +85,7 @@ class PatientController extends Controller
         return view('patients.edit', compact('patient', 'patient_email', 'available_users', 'genders'));
     }
 
+    
     /**
      * Update the specified resource in storage.
      */
