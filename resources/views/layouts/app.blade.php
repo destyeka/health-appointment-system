@@ -37,11 +37,10 @@
                     } elseif ($user->id_role == 3) {
                         $userName = optional($user->patient)->name ?? $user->name;
                     } else {
-                        $userName = $user->name ?? 'User'; // Fallback
+                        $userName = $user->name ?? 'User';
                     }
                 @endphp
 
-                {{-- Tautan Khusus Pasien --}}
                 @if ($user->id_role == 3)
                     <a href="{{ route('appointments.my') }}" class="text-gray-700 hover:text-[#009688] transition">Jadwal Appointment</a>
                 @endif
