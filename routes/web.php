@@ -35,9 +35,8 @@ Route::get('/dashboard', function () {
 
     } else if ($user->role->role_name == 'Doctor') {
 
-        // TODO: Arahkan Dokter ke halaman jadwal mereka
-        // (Untuk sekarang, biarkan di dashboard)
-        return view('dashboard'); 
+        // Arahkan Dokter ke halaman kelola appointment
+        return redirect()->route('appointments.doctor');
 
     } else if ($user->role->role_name == 'Patient') {
 
@@ -108,6 +107,19 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['auth'])->group(function () {
     Route::get('/my-appointments', [AppointmentController::class, 'myBookedAppointments'])
         ->name('appointments.my');
+    
+    // Doctor appointments management
+    Route::get('/doctor/appointments', [AppointmentController::class, 'doctorAppointments'])
+        ->name('appointments.doctor');
+    // Start/End dedicated page
+    Route::get('/doctor/start-end', [AppointmentController::class, 'startEnd'])
+        ->name('appointments.start_end');
+    Route::post('/appointments/{id}/start', [AppointmentController::class, 'startAppointment'])
+        ->name('appointments.start');
+    Route::post('/appointments/{id}/end', [AppointmentController::class, 'endAppointment'])
+        ->name('appointments.end');
+    Route::post('/appointments/{id}/skip', [AppointmentController::class, 'skipAppointment'])
+        ->name('appointments.skip');
 });
 
 // Route::resource('user-roles', RoleController::class)->parameters([
