@@ -12,68 +12,47 @@
     {{-- ================= HEADER ================= --}}
     <header class="flex justify-between items-center py-4 px-8 bg-white shadow-sm border-b border-gray-100">
         {{-- Logo --}}
-        <div class="flex items-center space-x-2">
+        <a href="/" class="flex items-center space-x-2">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Logo_of_Universitas_Negeri_Semarang.jpg/960px-Logo_of_Universitas_Negeri_Semarang.jpg"
-                 alt="Logo" class="h-6">
+                alt="Logo" class="h-6">
             <span class="font-semibold text-gray-800">PONDOK UNNES</span>
-        </div>
+        </a>
 
         {{-- Navigation --}}
         <nav class="flex items-center space-x-6 text-sm">
             <a href="{{ route('doctors.searchPage') }}" class="text-gray-700 hover:text-[#009688] transition">Cari Dokter</a>
 
-            {{-- ======= DROPDOWN USER ======= --}}
+            {{-- ======= DROPDOWN USER (AUTH) ======= --}}
             @auth
                 @php
                     $user = Auth::user();
-                    if ($user->id_role == 1) {
-                        $profileRoute = route('profile.show'); // admin
-                    } elseif ($user->id_role == 2) {
-                        $profileRoute = route('profile.show'); // doctor
+                    $profileRoute = route('profile.show');
+
+                    // Mendapatkan nama pengguna yang sesuai
+                    $userName = 'User';
+                    if ($user->id_role == 1 && isset($user->admin->name)) {
+                        $userName = $user->admin->name;
+                    } elseif ($user->id_role == 2 && isset($user->doctor->name)) {
+                        $userName = $user->doctor->name;
                     } elseif ($user->id_role == 3) {
-                        $profileRoute = route('profile.show'); // patient
+                        $userName = optional($user->patient)->name ?? $user->name;
                     } else {
-                        $profileRoute = '#';
+                        $userName = $user->name ?? 'User';
                     }
                 @endphp
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
-        <nav class="bg-white border-b border-gray-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center">
-                        <a href="{{ route('dashboard') }}" class="text-xl font-semibold">Health Appointment</a>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        @php
-                        $user = Auth::user();
-                        @endphp
-                        @auth
 
-                        @if ($user->id_role == 1)
-                        <span class="text-gray-700">Hello, {{ Auth::user()->admin->name }}</span>
-                        <a href="{{ route('profile.show') }}" class="text-gray-600 hover:text-gray-900">Profil</a>
-                        
-                        @elseif ($user->id_role == 2)
-                        <span class="text-gray-700">Hello, {{ Auth::user()->doctor->name }}</span>
-                        <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
-                        
-                        @elseif ($user->id_role == 3)
-                        <span class="text-gray-700">Hello, {{ optional(Auth::user()->patient)->name ?? Auth::user()->name }}</span>
-                        <x-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
-                            {{ __('Jadwal Appointment') }}
-                        </x-nav-link>
-                        <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
-                        @endif
+                @if ($user->id_role == 3)
+                    <a href="{{ route('appointments.my') }}" class="text-gray-700 hover:text-[#009688] transition">Jadwal Appointment</a>
+                @endif
 
                 <div class="relative">
                     <button id="userMenuButton"
                         class="flex items-center space-x-2 text-gray-700 font-medium focus:outline-none">
                         <div class="w-7 h-7 rounded-full bg-[#009688] text-white flex items-center justify-center text-sm">
-                            {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
+                            {{ strtoupper(substr($userName, 0, 1)) }}
                         </div>
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
-                             viewBox="0 0 24 24">
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
@@ -96,8 +75,8 @@
                 </div>
             @else
                 <a href="{{ route('login') }}"
-                   class="bg-[#009688] text-white px-4 py-1 rounded-full text-sm hover:bg-[#00796b] transition">
-                   Masuk / Daftar
+                    class="bg-[#009688] text-white px-4 py-1 rounded-full text-sm hover:bg-[#00796b] transition">
+                    Masuk / Daftar
                 </a>
             @endauth
         </nav>
@@ -128,7 +107,7 @@
 
         // Tutup dropdown saat klik di luar
         document.addEventListener('click', function (e) {
-            if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+            if (button && dropdown && !button.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.add('hidden');
             }
         });
