@@ -36,6 +36,35 @@
                         $profileRoute = '#';
                     }
                 @endphp
+<body class="font-sans antialiased">
+    <div class="min-h-screen bg-gray-100">
+        <nav class="bg-white border-b border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <a href="{{ route('dashboard') }}" class="text-xl font-semibold">Health Appointment</a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        @php
+                        $user = Auth::user();
+                        @endphp
+                        @auth
+
+                        @if ($user->id_role == 1)
+                        <span class="text-gray-700">Hello, {{ Auth::user()->admin->name }}</span>
+                        <a href="{{ route('profile.show') }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                        
+                        @elseif ($user->id_role == 2)
+                        <span class="text-gray-700">Hello, {{ Auth::user()->doctor->name }}</span>
+                        <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                        
+                        @elseif ($user->id_role == 3)
+                        <span class="text-gray-700">Hello, {{ optional(Auth::user()->patient)->name ?? Auth::user()->name }}</span>
+                        <x-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
+                            {{ __('Jadwal Appointment') }}
+                        </x-nav-link>
+                        <a href="{{ route('profile.show', $user->id_user) }}" class="text-gray-600 hover:text-gray-900">Profil</a>
+                        @endif
 
                 <div class="relative">
                     <button id="userMenuButton"
