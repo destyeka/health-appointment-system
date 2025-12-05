@@ -21,12 +21,16 @@ class Appointment extends Model
         'is_called',
         'called_at',
         'estimated_wait_minutes',
-        'consultation_type'
+        'consultation_type',
+        'started_at',
+        'ended_at'
     ];
 
     protected $casts = [
         'appointment_date' => 'datetime',
-        'appointment_time' => 'datetime'
+        'appointment_time' => 'datetime',
+        'started_at' => 'datetime',
+        'ended_at' => 'datetime'
     ];
 
     public function doctorSchedule() {

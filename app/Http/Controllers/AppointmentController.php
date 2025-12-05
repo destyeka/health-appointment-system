@@ -315,5 +315,229 @@ class AppointmentController extends Controller
         return view('appointments.my_booked_appointments', compact('appointments'));
     }
 
+    /**
+     * Tampilkan daftar appointment untuk doctor (hari ini dan 7 hari ke depan)
+     */
+    public function doctorAppointments(Request $request)
+    {
+        $userId = Auth::id();
+        
+        // Cari doctor berdasarkan id_user
+        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+        
+        if (!$doctor) {
+            return redirect()->route('dashboard')->with('error', 'Data dokter tidak ditemukan.');
+        }
+
+        // Ambil semua doctor schedules milik doctor ini
+        $doctorSchedules = DoctorSchedule::where('id_doctor', $doctor->id_doctor)->pluck('id_doctor_schedule');
+
+        // Ambil appointments dari hari ini sampai 7 hari ke depan
+        $startDate = Carbon::today();
+        $endDate = Carbon::today()->addDays(7);
+        
+        $query = Appointment::with('patient.user', 'doctorSchedule.doctor')
+            ->whereIn('id_doctor_schedule', $doctorSchedules)
+            ->whereBetween('appointment_date', [$startDate, $endDate])
+            ->where('status', '!=', 'canceled');
+
+        // Apply filters
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('consultation_type')) {
+            $query->where('consultation_type', $request->consultation_type);
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('appointment_date', $request->date);
+        }
+
+        $appointments = $query
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+
+        // Hitung queue number dan status untuk setiap appointment
+        $calculator = new EstimatedWaitTimeCalculator(15, 0);
+        
+        foreach ($appointments as $appointment) {
+            $allAppointments = Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
+                ->whereDate('appointment_date', $appointment->appointment_date)
+                ->where('status', '!=', 'canceled')
+                ->orderBy('appointment_time', 'asc')
+                ->get();
+
+            $queueNumber = $allAppointments->search(function ($a) use ($appointment) {
+                return $a->id_appointment == $appointment->id_appointment;
+            }) + 1;
+
+            $appointment->queue_number = $queueNumber;
+
+            // Format appointment datetime
+            $appointmentDate = is_object($appointment->appointment_date) 
+                ? $appointment->appointment_date->format('Y-m-d')
+                : (string)$appointment->appointment_date;
+            
+            $appointmentTime = is_object($appointment->appointment_time)
+                ? $appointment->appointment_time->format('H:i:s')
+                : (string)$appointment->appointment_time;
+
+            // Hitung estimated wait time
+            $waitTimeData = $calculator->calculateByDateTime(
+                $appointmentDate,
+                $appointmentTime,
+                $queueNumber
+            );
+
+            $appointment->estimated_wait_data = $waitTimeData;
+        }
+
+        return view('appointments.doctor-appointments', compact('appointments', 'doctor'));
+    }
+
+    /**
+     * Tampilkan halaman Start/End (dedicated page) untuk doctor
+     */
+    public function startEnd(Request $request)
+    {
+        $userId = Auth::id();
+        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+
+        if (!$doctor) {
+            return redirect()->route('dashboard')->with('error', 'Data dokter tidak ditemukan.');
+        }
+
+        $doctorSchedules = DoctorSchedule::where('id_doctor', $doctor->id_doctor)->pluck('id_doctor_schedule');
+        $startDate = Carbon::today();
+        $endDate = Carbon::today()->addDays(7);
+
+        $appointments = Appointment::with('patient.user', 'doctorSchedule.doctor')
+            ->whereIn('id_doctor_schedule', $doctorSchedules)
+            ->whereBetween('appointment_date', [$startDate, $endDate])
+            ->where('status', '!=', 'canceled')
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+
+        // calculate queue numbers like doctorAppointments
+        $calculator = new EstimatedWaitTimeCalculator(15, 0);
+        foreach ($appointments as $appointment) {
+            $allAppointments = Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
+                ->whereDate('appointment_date', $appointment->appointment_date)
+                ->where('status', '!=', 'canceled')
+                ->orderBy('appointment_time', 'asc')
+                ->get();
+
+            $queueNumber = $allAppointments->search(function ($a) use ($appointment) {
+                return $a->id_appointment == $appointment->id_appointment;
+            }) + 1;
+
+            $appointment->queue_number = $queueNumber;
+            $appointmentDate = is_object($appointment->appointment_date) ? $appointment->appointment_date->format('Y-m-d') : (string)$appointment->appointment_date;
+            $appointmentTime = is_object($appointment->appointment_time) ? $appointment->appointment_time->format('H:i:s') : (string)$appointment->appointment_time;
+            $waitTimeData = $calculator->calculateByDateTime($appointmentDate, $appointmentTime, $queueNumber);
+            $appointment->estimated_wait_data = $waitTimeData;
+        }
+
+        return view('appointments.start-end', compact('appointments', 'doctor'));
+    }
+
+    /**
+     * Start appointment (ubah status menjadi on_going)
+     */
+    public function startAppointment($id)
+    {
+        $appointment = Appointment::find($id);
+
+        if (!$appointment) {
+            return response()->json(['success' => false, 'message' => 'Appointment tidak ditemukan'], 404);
+        }
+
+        // Verifikasi bahwa user adalah doctor untuk appointment ini
+        $userId = Auth::id();
+        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+        
+        if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
+        }
+
+        // Update status dan started_at
+        $appointment->update([
+            'status' => 'on_going',
+            'started_at' => Carbon::now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appointment dimulai',
+            'appointment' => $appointment
+        ]);
+    }
+
+    /**
+     * End appointment (ubah status menjadi finished)
+     */
+    public function endAppointment($id)
+    {
+        $appointment = Appointment::find($id);
+
+        if (!$appointment) {
+            return response()->json(['success' => false, 'message' => 'Appointment tidak ditemukan'], 404);
+        }
+
+        // Verifikasi bahwa user adalah doctor untuk appointment ini
+        $userId = Auth::id();
+        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+        
+        if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
+        }
+
+        // Update status dan ended_at
+        $appointment->update([
+            'status' => 'finished',
+            'ended_at' => Carbon::now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appointment selesai',
+            'appointment' => $appointment
+        ]);
+    }
+
+    /**
+     * Skip appointment (ubah status menjadi finished tanpa ended_at)
+     */
+    public function skipAppointment($id)
+    {
+        $appointment = Appointment::find($id);
+
+        if (!$appointment) {
+            return response()->json(['success' => false, 'message' => 'Appointment tidak ditemukan'], 404);
+        }
+
+        // Verifikasi bahwa user adalah doctor untuk appointment ini
+        $userId = Auth::id();
+        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+        
+        if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
+        }
+
+        // Update status (skip appointment)
+        $appointment->update([
+            'status' => 'finished'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appointment di-skip',
+            'appointment' => $appointment
+        ]);
+    }
+
 
 }
