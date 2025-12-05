@@ -130,11 +130,13 @@ class DoctorController extends Controller
     /**
      * Menampilkan halaman "Cari Dokter" untuk Pasien.
      */
+
     public function showSearchPage()
     {
-        // Fungsi ini yang memuat file Blade yang Anda seleksi
-        return view('doctors.search');
+        $doctors = Doctor::with('schedules')->get(); // ambil semua dokter dan jadwalnya
+        return view('doctors.search', compact('doctors'));
     }
+
 
     /**
      * Menangani permintaan "Fetching" (API) dari JavaScript.
