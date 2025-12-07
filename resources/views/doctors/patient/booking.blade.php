@@ -77,9 +77,9 @@
             <div
               class="absolute inset-0 bg-teal-500 rounded-full blur opacity-20 group-hover:opacity-30 transition-opacity">
             </div>
-            <img src="{{ $doctor->photo_url ?? 'https://i.ibb.co/qY8xXfK/default-doctor.png' }}"
-              alt="Foto {{ $doctor->name }}"
-              class="relative w-full h-full object-cover rounded-full border-4 border-white shadow-md">
+            <div class="w-full h-full rounded-full bg-[#009688] text-white flex items-center justify-center text-5xl">
+                            {{ strtoupper(substr($doctor->name, 0, 1)) }}
+                        </div>
           </div>
 
           <h1 class="text-2xl font-bold text-gray-900 mb-1">
