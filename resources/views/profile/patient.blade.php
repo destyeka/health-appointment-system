@@ -51,13 +51,13 @@
         {{-- =================== SIDEBAR =================== --}}
         <div class="w-full lg:w-1/4">
             <div class="bg-white rounded-xl shadow-lg p-3 h-full min-h-[500px] flex flex-col justify-start">
-                <button class="tab-button w-full flex items-center p-3 rounded-lg transition duration-150 mb-2 active-tab" data-tab="jadwal">
+                <!-- <button class="tab-button w-full flex items-center p-3 rounded-lg transition duration-150 mb-2 active-tab" data-tab="jadwal">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     Jadwal Konsultasi
-                </button>
+                </button> -->
                 <button class="tab-button w-full flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-50 transition duration-150 mb-2" data-tab="riwayat">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -80,7 +80,7 @@
             <div class="bg-white rounded-xl shadow-lg p-8 h-full min-h-[500px] flex flex-col justify-between">
 
                 {{-- ========== TAB JADWAL KONSULTASI ========== --}}
-                <div id="tab-jadwal" class="tab-content">
+                <!-- <div id="tab-jadwal" class="tab-content">
                     <h2 class="text-2xl font-semibold text-gray-700 mb-6">Jadwal Konsultasi Anda</h2>
                     @if(isset($appointments) && count($appointments) > 0)
                         @foreach($appointments as $a)
@@ -111,7 +111,7 @@
                             <p>Tidak ada jadwal konsultasi saat ini.</p>
                         </div>
                     @endif
-                </div>
+                </div> -->
 
                 {{-- ========== TAB RIWAYAT MEDIS ========== --}}
                 <div id="tab-riwayat" class="tab-content hidden">

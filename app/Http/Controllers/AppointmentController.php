@@ -249,7 +249,7 @@ class AppointmentController extends Controller
         // Ambil semua appointment aktif milik pasien
         $appointments = \App\Models\Appointment::with('doctorSchedule.doctor', 'payment')
             ->where('id_patient', $patient->id_patient)
-            ->where('status', '!=', 'cancelled')
+            ->where('status', '=', 'scheduled')
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
@@ -262,6 +262,12 @@ class AppointmentController extends Controller
             $allAppointments = \App\Models\Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
                 ->whereDate('appointment_date', $appointment->appointment_date)
                 ->where('status', '!=', 'cancelled')
+                ->orderBy('appointment_time', 'asc')
+                ->get();
+
+            $upcomingAppointments = \App\Models\Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
+                ->whereDate('appointment_date', $appointment->appointment_date)
+                ->where('status', '=', 'scheduled')
                 ->orderBy('appointment_time', 'asc')
                 ->get();
 
