@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pondok UNNES</title>
-    @vite('resources/css/app.css')
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ config('app.name', 'Laravel') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="bg-[#f1f9fb] font-sans antialiased min-h-screen flex flex-col">
@@ -37,11 +38,10 @@
                     } elseif ($user->id_role == 3) {
                         $userName = optional($user->patient)->name ?? $user->name;
                     } else {
-                        $userName = $user->name ?? 'User'; // Fallback
+                        $userName = $user->name ?? 'User';
                     }
                 @endphp
 
-                {{-- Tautan Khusus Pasien --}}
                 @if ($user->id_role == 3)
                     <a href="{{ route('appointments.my') }}" class="text-gray-700 hover:text-[#009688] transition">Jadwal Appointment</a>
                 @endif

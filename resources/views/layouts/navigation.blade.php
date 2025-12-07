@@ -15,6 +15,23 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    
+                    {{-- Link untuk Doctor --}}
+                    @if(\App\Models\Doctor::where('id_user', auth()->id())->exists())
+                        <x-nav-link :href="route('appointments.doctor')" :active="request()->routeIs('appointments.doctor')">
+                            {{ __('Kelola Appointment') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('appointments.start_end')" :active="request()->routeIs('appointments.start_end')">
+                            {{ __('Start/End') }}
+                        </x-nav-link>
+                    @endif
+                    
+                    {{-- Link untuk Pasien --}}
+                    @if(\App\Models\Patient::where('id_user', auth()->id())->exists())
+                        <x-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
+                            {{ __('Appointment Saya') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -33,6 +50,53 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        @php
+                            $isDoctor = \App\Models\Doctor::where('id_user', auth()->id())->exists();
+                        @endphp
+
+                        @if($isDoctor)
+                            @php
+                                $doctor = \App\Models\Doctor::where('id_user', auth()->id())->first();
+                                $doctorSchedules = \App\Models\DoctorSchedule::where('id_doctor', $doctor->id_doctor)->pluck('id_doctor_schedule');
+                                $startDate = \Carbon\Carbon::today();
+                                $endDate = \Carbon\Carbon::today()->addDays(7);
+                                $quickAppointments = \App\Models\Appointment::with('patient')
+                                    ->whereIn('id_doctor_schedule', $doctorSchedules)
+                                    ->whereBetween('appointment_date', [$startDate, $endDate])
+                                    ->where('status', '!=', 'canceled')
+                                    ->orderBy('appointment_date', 'asc')
+                                    ->limit(8)
+                                    ->get();
+                            @endphp
+
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-700">Tindakan Cepat</div>
+                            </div>
+
+                            @forelse($quickAppointments as $qa)
+                                <div class="px-4 py-2 text-sm flex items-center justify-between">
+                                    <div class="mr-3">
+                                        <div class="font-medium">{{ $qa->patient->name ?? 'Pasien' }}</div>
+                                        <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($qa->appointment_date)->format('d M') }} {{ \Carbon\Carbon::parse($qa->appointment_time)->format('H:i') }}</div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        @if($qa->status === 'scheduled')
+                                            <button onclick="navStart({{ $qa->id_appointment }}, this)" class="bg-green-500 text-white px-2 py-1 rounded text-xs">Mulai</button>
+                                            <button onclick="navSkip({{ $qa->id_appointment }}, this)" class="bg-orange-500 text-white px-2 py-1 rounded text-xs">Skip</button>
+                                        @elseif($qa->status === 'on_going')
+                                            <button onclick="navEnd({{ $qa->id_appointment }}, this)" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Selesai</button>
+                                        @else
+                                            <span class="text-xs text-gray-500">Selesai</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="px-4 py-2 text-sm text-gray-500">Tidak ada tindakan cepat</div>
+                            @endforelse
+
+                            <div class="border-t border-gray-100"></div>
+                        @endif
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -69,10 +133,17 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
+            {{-- Tampilkan hanya untuk dokter --}}
+            @if(\App\Models\Doctor::where('id_user', auth()->id())->exists())
+                <x-responsive-nav-link :href="route('appointments.doctor')" :active="request()->routeIs('appointments.doctor')">
+                    {{ __('Kelola Appointment') }}
+                </x-responsive-nav-link>
+            @endif
+
             {{-- Tampilkan hanya untuk pasien --}}
             @if(\App\Models\Patient::where('id_user', auth()->id())->exists())
                 <x-responsive-nav-link :href="route('appointments.my')" :active="request()->routeIs('appointments.my')">
-                    {{ __('Jadwal Appointment') }}
+                    {{ __('Appointment Saya') }}
                 </x-responsive-nav-link>
             @endif
         </div>
@@ -102,3 +173,86 @@
         </div>
     </div>
 </nav>
+
+<script>
+    async function navStart(id, btn) {
+        if (!confirm('Mulai appointment ini?')) return;
+        try {
+            const res = await fetch(`/appointments/${id}/start`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                // swap buttons
+                const parent = btn.closest('div');
+                parent.innerHTML = '';
+                const finish = document.createElement('button');
+                finish.className = 'bg-red-500 text-white px-2 py-1 rounded text-xs';
+                finish.textContent = 'Selesai';
+                finish.onclick = function() { navEnd(id, finish); };
+                parent.appendChild(finish);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Terjadi error. Cek console.');
+        }
+    }
+
+    async function navEnd(id, btn) {
+        if (!confirm('Selesaikan appointment ini?')) return;
+        try {
+            const res = await fetch(`/appointments/${id}/end`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                const parent = btn.closest('div');
+                parent.innerHTML = '<span class="text-xs text-gray-500">Selesai</span>';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Terjadi error. Cek console.');
+        }
+    }
+
+    async function navSkip(id, btn) {
+        if (!confirm('Skip appointment ini?')) return;
+        try {
+            const res = await fetch(`/appointments/${id}/skip`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                const parent = btn.closest('div');
+                parent.innerHTML = '<span class="text-xs text-gray-500">Selesai</span>';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Terjadi error. Cek console.');
+        }
+    }
+</script>
