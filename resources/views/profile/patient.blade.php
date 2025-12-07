@@ -58,19 +58,19 @@
                     </svg>
                     Jadwal Konsultasi
                 </button> -->
+                <button class="tab-button w-full flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-50 transition duration-150 mb-2 active-tab" data-tab="profil">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Profil
+                </button>
                 <button class="tab-button w-full flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-50 transition duration-150 mb-2" data-tab="riwayat">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
                     </svg>
                     Riwayat Medis
-                </button>
-                <button class="tab-button w-full flex items-center p-3 rounded-lg text-gray-600 hover:bg-gray-50 transition duration-150" data-tab="profil">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    Profil
                 </button>
             </div>
         </div>
@@ -173,7 +173,7 @@
 
 
                 {{-- ========== TAB PROFIL ========== --}}
-                <div id="tab-profil" class="tab-content hidden">
+                <div id="tab-profil" class="tab-content">
                     <h2 class="text-2xl font-semibold text-gray-700 mb-6">Informasi Profil</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
                         <div>

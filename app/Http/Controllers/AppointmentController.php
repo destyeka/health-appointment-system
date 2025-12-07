@@ -27,10 +27,10 @@ class AppointmentController extends Controller
     public function show($id)
     {
         $appointment = Appointment::with([
-                'patient',
-                'doctorSchedule.doctor',
-                'payment'
-            ])
+            'patient',
+            'doctorSchedule.doctor',
+            'payment'
+        ])
             ->where('id_appointment', $id)
             ->first();
 
@@ -213,7 +213,7 @@ class AppointmentController extends Controller
                 return redirect()->route('appointments.confirmation', $doctorSchedule)
                     ->with('error', 'Gagal membuat pembayaran. Silakan coba lagi.');
             }
-            
+
         } catch (\Exception $e) {
             $payment->paymentDetails()->update(['status_payment' => 'failed']);
             return redirect()->route('appointments.confirmation', $doctorSchedule)
@@ -221,10 +221,10 @@ class AppointmentController extends Controller
         }
 
     }
- 
+
     public function adminIndex()
     {
-    // Ambil appointment yang sudah dibayar
+        // Ambil appointment yang sudah dibayar
         $appointments = Appointment::with(['patient', 'doctorSchedule.doctor', 'payment'])
             ->whereHas('payment', function ($query) {
                 $query->where('booking_is_paid', true)
@@ -254,6 +254,13 @@ class AppointmentController extends Controller
             ->orderBy('appointment_time', 'asc')
             ->get();
 
+        $appointmentHistory = Appointment::with('doctorSchedule.doctor', 'payment')
+            ->where('id_patient', $patient->id_patient)
+            ->where('status', '!=', 'scheduled')
+            ->orderBy('appointment_date', 'desc')
+            ->orderBy('appointment_time', 'desc')
+            ->get();
+
         // Inisialisasi calculator (15 menit per pasien, 0 menit buffer)
         $calculator = new EstimatedWaitTimeCalculator(15, 0);
 
@@ -278,13 +285,13 @@ class AppointmentController extends Controller
             $appointment->queue_number = $queueNumber;
 
             // Konversi appointment_date dan appointment_time ke format string
-            $appointmentDate = is_object($appointment->appointment_date) 
+            $appointmentDate = is_object($appointment->appointment_date)
                 ? $appointment->appointment_date->format('Y-m-d')
-                : (string)$appointment->appointment_date;
-            
+                : (string) $appointment->appointment_date;
+
             $appointmentTime = is_object($appointment->appointment_time)
                 ? $appointment->appointment_time->format('H:i:s')
-                : (string)$appointment->appointment_time;
+                : (string) $appointment->appointment_time;
 
             // Gunakan calculator untuk menghitung estimated wait time
             $waitTimeData = $calculator->calculateByDateTime(
@@ -318,7 +325,7 @@ class AppointmentController extends Controller
             }
         }
 
-        return view('appointments.my_booked_appointments', compact('appointments'));
+        return view('appointments.my_booked_appointments', compact('appointments', 'appointmentHistory'));
     }
 
     /**
@@ -327,10 +334,10 @@ class AppointmentController extends Controller
     public function doctorAppointments(Request $request)
     {
         $userId = Auth::id();
-        
+
         // Cari doctor berdasarkan id_user
         $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
-        
+
         if (!$doctor) {
             return redirect()->route('dashboard')->with('error', 'Data dokter tidak ditemukan.');
         }
@@ -341,7 +348,7 @@ class AppointmentController extends Controller
         // Ambil appointments dari hari ini sampai 7 hari ke depan
         $startDate = Carbon::today();
         $endDate = Carbon::today()->addDays(7);
-        
+
         $query = Appointment::with('patient.user', 'doctorSchedule.doctor')
             ->whereIn('id_doctor_schedule', $doctorSchedules)
             ->whereBetween('appointment_date', [$startDate, $endDate])
@@ -367,7 +374,7 @@ class AppointmentController extends Controller
 
         // Hitung queue number dan status untuk setiap appointment
         $calculator = new EstimatedWaitTimeCalculator(15, 0);
-        
+
         foreach ($appointments as $appointment) {
             $allAppointments = Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
                 ->whereDate('appointment_date', $appointment->appointment_date)
@@ -382,13 +389,13 @@ class AppointmentController extends Controller
             $appointment->queue_number = $queueNumber;
 
             // Format appointment datetime
-            $appointmentDate = is_object($appointment->appointment_date) 
+            $appointmentDate = is_object($appointment->appointment_date)
                 ? $appointment->appointment_date->format('Y-m-d')
-                : (string)$appointment->appointment_date;
-            
+                : (string) $appointment->appointment_date;
+
             $appointmentTime = is_object($appointment->appointment_time)
                 ? $appointment->appointment_time->format('H:i:s')
-                : (string)$appointment->appointment_time;
+                : (string) $appointment->appointment_time;
 
             // Hitung estimated wait time
             $waitTimeData = $calculator->calculateByDateTime(
@@ -441,8 +448,8 @@ class AppointmentController extends Controller
             }) + 1;
 
             $appointment->queue_number = $queueNumber;
-            $appointmentDate = is_object($appointment->appointment_date) ? $appointment->appointment_date->format('Y-m-d') : (string)$appointment->appointment_date;
-            $appointmentTime = is_object($appointment->appointment_time) ? $appointment->appointment_time->format('H:i:s') : (string)$appointment->appointment_time;
+            $appointmentDate = is_object($appointment->appointment_date) ? $appointment->appointment_date->format('Y-m-d') : (string) $appointment->appointment_date;
+            $appointmentTime = is_object($appointment->appointment_time) ? $appointment->appointment_time->format('H:i:s') : (string) $appointment->appointment_time;
             $waitTimeData = $calculator->calculateByDateTime($appointmentDate, $appointmentTime, $queueNumber);
             $appointment->estimated_wait_data = $waitTimeData;
         }
@@ -464,7 +471,7 @@ class AppointmentController extends Controller
         // Verifikasi bahwa user adalah doctor untuk appointment ini
         $userId = Auth::id();
         $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
-        
+
         if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
             return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
         }
@@ -496,7 +503,7 @@ class AppointmentController extends Controller
         // Verifikasi bahwa user adalah doctor untuk appointment ini
         $userId = Auth::id();
         $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
-        
+
         if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
             return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
         }
@@ -528,7 +535,7 @@ class AppointmentController extends Controller
         // Verifikasi bahwa user adalah doctor untuk appointment ini
         $userId = Auth::id();
         $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
-        
+
         if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
             return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
         }
