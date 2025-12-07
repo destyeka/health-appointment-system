@@ -128,8 +128,8 @@
                   <button type="button" onclick="selectDay(this)" data-date="{{ $data['date_string'] }}"
                     data-schedule-id="{{ $data['schedule_id'] }}" data-route="{{ $data['route_url'] }}"
                     data-doctor="{{ $data['doctor_name'] }}" data-specialty="{{ $data['specialty'] }}"
-                    class="day-tab flex-shrink-0 flex flex-col items-center justify-center min-w-[80px] h-20 rounded-2xl border transition-all duration-200 
-                                          {{ $index === 0 ? 'border-teal-500 bg-teal-50 text-teal-700 ring-2 ring-teal-500 ring-offset-1' : 'border-gray-200 hover:border-teal-300 text-gray-600' }}">
+                    class="day-tab flex-shrink-0 flex flex-col items-center justify-center min-w-[80px] h-20 rounded-2xl border
+                                            {{ $index === 0 ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 hover:border-teal-300 text-gray-600' }}">
                     <span
                       class="text-xs font-medium uppercase tracking-wider mb-1">{{ substr($data['day_name'], 0, 3) }}</span>
                     <span class="text-lg font-bold">{{ \Carbon\Carbon::parse($data['date_string'])->format('d') }}</span>
@@ -156,12 +156,10 @@
                         {{ $slot['time'] }}
                       </button>
                     @else
-                      <button type="button" 
-                        onclick="selectTime(this)"
-                        data-time="{{ $slot['time'] }}"
+                      <button type="button" onclick="selectTime(this)" data-time="{{ $slot['time'] }}"
                         class="time-btn py-2 px-3 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:border-teal-500 hover:text-teal-600 transition-all focus:outline-none">
                         {{ $slot['time'] }}
-                    </button>
+                      </button>
                       </button>
                     @endif
                   @empty
@@ -230,7 +228,7 @@
         el.classList.add('border-gray-200', 'text-gray-600');
       });
       element.classList.remove('border-gray-200', 'text-gray-600');
-      element.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700', 'ring-2', 'ring-teal-500', 'ring-offset-1');
+      element.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700');
 
       // 2. VISUAL: Show relevant slot container
       document.querySelectorAll('.slot-container').forEach(el => {
