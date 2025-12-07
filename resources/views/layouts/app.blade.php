@@ -91,7 +91,7 @@
 
     {{-- ================= FOOTER ================= --}}
     <footer class="bg-white border-t border-gray-100 text-center py-4 text-xs text-gray-500 mt-auto">
-        ©️ {{ date('Y') }} Pondok UNNES. Semua Hak Dilindungi.
+        © {{ date('Y') }} Pondok UNNES. Semua Hak Dilindungi.
     </footer>
 
     {{-- ================= DROPDOWN SCRIPT ================= --}}
