@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\Doctor;
 use App\Models\DoctorSchedule;
 use App\Services\EstimatedWaitTimeCalculator;
+use App\Events\AppointmentBooked;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
@@ -152,6 +153,9 @@ class AppointmentController extends Controller
             'appointment_time' => Carbon::parse($request->appointment_time)->format('H:i'),
             'consultation_type' => $request->consultation_type,
         ]);
+
+        // Dispatch event to send notifications
+        AppointmentBooked::dispatch($appointment);
 
         $payment = $appointment->payment()->create([
             'grand_total' => 0,
