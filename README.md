@@ -59,3 +59,27 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Notifications & Queue
+
+This application uses an event → listener → job pattern to send email and WhatsApp notifications when appointments are booked and payments processed.
+
+- Env vars: copy `.env.example` and set these values:
+	- `MAIL_*` (mailer configuration)
+	- `QUEUE_CONNECTION` (default uses `database` in `.env.example`)
+	- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` for WhatsApp notifications
+
+- To enable queued jobs (database driver):
+
+```powershell
+php artisan queue:table
+php artisan migrate
+php artisan queue:work
+```
+
+- Testing flow:
+	1. Create an appointment via the booking UI (fires `AppointmentCreated` event).
+	2. Complete payment (calls `PaymentController::success`) — this dispatches `PaymentProcessed`.
+	3. Run a queue worker (`php artisan queue:work`) to process jobs that send emails and WhatsApp messages.
+
+If you use an external queue (Redis, Horizon, etc.), update `QUEUE_CONNECTION` accordingly and follow provider docs.
