@@ -25,6 +25,7 @@ class PermissionSeeder extends Seeder
             'doctor' => 'dokter',
             'patient' => 'pasien',
             'notification' => 'notifikasi',
+            'permission' => 'permission',
         ];
 
         $actions = [
