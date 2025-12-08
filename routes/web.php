@@ -138,7 +138,14 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/appointments/{id}/record', [AppointmentController::class, 'storeMedicalRecord'])->name('appointments.record.store');
     
+
+    Route::middleware([
+                        'permission:make_doctor'])
+                        ->group(function () {
+                            Route::resource('doctors', DoctorController::class);
+                        });
 });
+
 
 // Route::resource('user-roles', RoleController::class)->parameters([
     //     'user-roles' => 'role'  

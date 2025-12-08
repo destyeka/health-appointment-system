@@ -50,7 +50,7 @@
                                     @endswitch
                                 </div>
 
-                                <h1 class="text-sm absolute right-4 bottom-4 flex items-start gap-2">Antrean<span class="text-3xl font-bold">{{ $appointment->queue_number ?? '-' }}</span></h1>
+                                <h1 class="text-sm absolute right-4 bottom-50 flex items-start gap-2">Antrean<span class="text-3xl font-bold">{{ $appointment->queue_number ?? '-' }}</span></h1>
 
                                 <div class="flex gap-6 text-gray-600 text-sm mt-2">
                                     <p>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('d M Y') }}</p>
@@ -67,6 +67,11 @@
                                                     <span class="countdown-label">Menunggu</span>
                                                 </div>
                                             </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <a href="" class="border border-[#009688] text-[#009688] px-4 py-2 rounded-md text-sm hover:bg-[#009688] hover:text-white transition">
+                                        Lihat Detail
+                                    </a>
                                 </div>
                             </div>
                         @endforeach
@@ -209,6 +214,11 @@
                                                     <span class="countdown-label">Menunggu</span>
                                                 </div>
                                             </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <a href="" class="border border-[#009688] text-[#009688] px-4 py-2 rounded-md text-sm hover:bg-[#009688] hover:text-white transition">
+                                        Lihat Detail
+                                    </a>
                                 </div>
                             </div>
                         @endforeach

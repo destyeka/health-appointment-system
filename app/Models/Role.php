@@ -34,6 +34,6 @@ class Role extends Model
 
     public function hasPermission(string $permission): bool
     {
-        return $this->permissions()->where('name', $permission)->exists();
+        return $this->permissions()->where('permission_name', $permission)->exists();
     }
 }

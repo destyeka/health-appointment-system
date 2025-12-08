@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\Appointment;
 use App\Models\PaymentDetail;
+use App\Models\Telemedicine;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -186,21 +188,45 @@ class PaymentController extends Controller
 
     public function success(PaymentDetail $payment_details)
     {
+        // 1. Security Check
         if ($payment_details->payment->appointment->patient->id_user !== auth()->id()) {
             abort(403);
         }
 
         $payment_details->refresh();
 
+        // 2. Check Status from Gateway (via Webhook/Callback usually)
+        // Assuming your Callback Controller has already set this to 'paid'
         if ($payment_details->status_payment !== 'paid') {
             return redirect()->route('payments.waiting', $payment_details);
         }
 
-
+        // 3. Logic based on Payment Type
         if ($payment_details->payment_type === 'booking') {
+
             $payment_details->payment->update([
                 'booking_is_paid' => true
             ]);
+
+            // --- START: TELEMEDICINE TRIGGER ---
+            $appointment = $payment_details->payment->appointment;
+
+            // Check if it is Online AND if a session hasn't been created yet
+            if ($appointment->consultation_type === 'online' && !$appointment->telemedicine) {
+
+                // Generate Unique Room Name: "MedBook-{ApptID}-{RandomString}"
+                $roomName = 'MedBook-' . $appointment->id_appointment . '-' . Str::random(8);
+                $sessionLink = 'https://meet.jit.si/' . $roomName;
+
+                // Create Record
+                Telemedicine::create([
+                    'id_appointment' => $appointment->id_appointment,
+                    'session_link' => $sessionLink,
+                    'status' => 'waiting' // Waiting for doctor
+                ]);
+            }
+            // --- END: TELEMEDICINE TRIGGER ---
+
         } elseif ($payment_details->payment_type === 'repayment') {
             $payment_details->payment->update([
                 'repayment_is_paid' => true
@@ -222,12 +248,12 @@ class PaymentController extends Controller
         $waitingPayment = PaymentDetail::whereHas('payment.appointment.patient', function ($query) {
             $query->where('id_user', auth()->id());
         })
-        ->where('status_payment', '=', 'waiting')
+            ->where('status_payment', '=', 'waiting')
             ->with(['payment.appointment.patient'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('payments.my-payments', compact('allPayment','waitingPayment'));
+        return view('payments.my-payments', compact('allPayment', 'waitingPayment'));
     }
 
     public function historyDetail(PaymentDetail $paymentDetail)
