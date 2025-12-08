@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('landing');
+})->name('landing');
 
 Route::get('/dashboard', function () {
 
@@ -41,7 +41,7 @@ Route::get('/dashboard', function () {
     } else if ($user->role->role_name == 'Patient') {
 
         // Arahkan Pasien ke halaman "Cari Dokter" yang baru kita buat
-        return redirect()->route('doctors.searchPage');
+        return redirect()->route('landing');
     }
 
     // Jika rolenya tidak dikenal, tampilkan dashboard default
@@ -73,6 +73,9 @@ Route::middleware('auth')->group(function () {
     // Mengarah ke fungsi searchApi yang kita buat
     Route::get('/doctors-search-api', [DoctorController::class, 'searchApi'])
          ->name('doctors.api.search');
+
+    Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
+
 
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
