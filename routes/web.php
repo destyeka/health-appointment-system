@@ -11,6 +11,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\NotificationController;
 use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -24,39 +25,27 @@ Route::get('/', function () {
 // Dashboard Redirect Logic
 Route::get('/dashboard', function () {
 
-    // Ambil data user yang sedang login
     $user = Auth::user(); 
 
-    // Muat relasi 'role'
     $user->loadMissing('role'); 
 
-    // Cek nama role-nya
     if ($user->role->role_name == 'Admin') {
 
-        // Arahkan Admin ke halaman CRUD
         return view('dashboard'); 
 
     } else if ($user->role->role_name == 'Doctor') {
 
-        // Arahkan Dokter ke halaman kelola appointment (Kalender)
         return redirect()->route('appointments.doctor');
 
     } else if ($user->role->role_name == 'Patient') {
 
-        // Arahkan Pasien ke halaman landing/cari dokter
         return redirect()->route('landing');
     }
 
-    // Jika rolenya tidak dikenal, tampilkan dashboard default
     return view('dashboard'); 
 
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-/*
-|--------------------------------------------------------------------------
-| Rute yang Memerlukan Autentikasi dan Permission (Resource CRUD)
-|--------------------------------------------------------------------------
-*/
 Route::middleware('auth')->group(function () {
     
     // Rute Profile (Diizinkan untuk semua peran)
@@ -73,9 +62,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details'); // Untuk melihat detail dokter dan memulai booking
 
     
-    // =========================================================
-    // RESOURCE ROUTES DENGAN MIDDLEWARE PERMISSION
-    // =========================================================
     
     // 1. Permissions (Admin Only)
     Route::resource('permissions', PermissionController::class)
@@ -149,9 +135,6 @@ Route::middleware('auth')->group(function () {
         ]);
 
 
-    // =========================================================
-    // RUTE BOOKING DAN PEMBAYARAN KHUSUS (Diizinkan jika ada make_appointment/make_payment)
-    // =========================================================
     
     // Rute Booking (Patient)
     Route::get('/appointment/{doctorSchedule}/confirmation', [AppointmentController::class, 'confirm'])
@@ -175,9 +158,6 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:view_payment')
         ->name('payments.success');
 
-    // =========================================================
-    // RUTE KHUSUS BERDASARKAN PERAN
-    // =========================================================
 
     // Rute Admin (Kelola Semua Appointment)
     Route::get('/admin/appointments', [AppointmentController::class, 'adminIndex'])
@@ -234,6 +214,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/appointments/{id}/skip', [AppointmentController::class, 'skipAppointment'])
         ->middleware('permission:edit_appointment')
         ->name('appointments.skip');
+
+    // Diizinkan oleh Admin, Dokter, dan Pasien (Semua punya view_notification)
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->middleware('permission:view_notification')
+        ->name('notifications.index');
+        
+    // Rute DELETE (Admin yang punya delete_notification, tapi logic controller membatasi hanya ke pemilik)
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])
+        ->middleware('permission:delete_notification')
+        ->name('notifications.destroy');
 });
 
 // Route Webhook tidak perlu autentikasi atau CSRF

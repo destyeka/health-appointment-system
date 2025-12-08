@@ -240,7 +240,7 @@ class AppointmentController extends Controller
             ->orderBy('appointment_date', 'desc')
             ->get();
 
-        return view('admin.appointments.index', compact('appointments'));
+        return view('appointments.index', compact('appointments'));
     }
     public function myBookedAppointments()
     {
