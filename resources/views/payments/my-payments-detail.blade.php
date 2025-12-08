@@ -137,7 +137,7 @@
                     <div class="mb-8">
                         <p class="text-sm text-gray-500 mb-1">Total Tagihan</p>
                         <div class="text-4xl font-extrabold text-[#009688]">
-                            Rp {{ number_format($details->amount, 0, ',', '.') }}
+                            Rp{{ number_format($details->amount, 0, ',', '.') }}
                         </div>
                         <p class="text-xs text-red-500 mt-2 font-medium">
                             Batas Pembayaran: {{ \Carbon\Carbon::parse($details->expired_at)->format('d M Y, H:i') }}
@@ -179,7 +179,7 @@
                                     </svg>
                                 </div>
                                 <span
-                                    class="font-semibold text-gray-800">{{ $details->method === 'bank_transfer' ? 'Transfer Bank' : 'E-Wallet' }}</span>
+                                    class="font-semibold text-gray-800">{{ $details->method === 'bank_transfer' ? 'Transfer Bank' : ($details->method === 'e_wallet' ? 'E-Wallet' : '-') }}</span>
                             </div>
                         </div>
 

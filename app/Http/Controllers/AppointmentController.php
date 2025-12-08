@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Str;
 
 class AppointmentController extends Controller
 {
@@ -703,33 +704,125 @@ class AppointmentController extends Controller
      * End appointment (ubah status menjadi finished)
      */
     public function endAppointment($id)
-    {
-        $appointment = Appointment::find($id);
+{
+    // 1. FETCH DATA (Eager load relationships needed for calculation & API)
+    $appointment = Appointment::with([
+        'doctorSchedule', 
+        'payment', 
+        'medicalRecord.prescriptions', 
+        'patient.user' // Needed to get patient's email for the gateway
+    ])->find($id);
 
-        if (!$appointment) {
-            return response()->json(['success' => false, 'message' => 'Appointment tidak ditemukan'], 404);
-        }
+    // 2. VALIDATION
+    if (!$appointment) {
+        return response()->json(['success' => false, 'message' => 'Appointment tidak ditemukan'], 404);
+    }
 
-        // Verifikasi bahwa user adalah doctor untuk appointment ini
-        $userId = Auth::id();
-        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+    $userId = Auth::id();
+    $doctor = Doctor::where('id_user', $userId)->first();
 
-        if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
-        }
+    if (!$doctor || !$appointment->doctorSchedule || $appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
+        return response()->json(['success' => false, 'message' => 'Anda tidak authorized'], 403);
+    }
 
-        // Update status dan ended_at
-        $appointment->update([
-            'status' => 'finished',
-            'ended_at' => Carbon::now()
-        ]);
+    // 3. CALCULATE BILL (Logic-Based Pricing)
+    $consultationFee = 150000; // Fixed Doctor Fee
+    $adminFee = 5000;          // Platform Fee
+    
+    // Count prescriptions: Rp 50.000 per medicine item
+    $medicineCount = 0;
+    if ($appointment->medicalRecord && $appointment->medicalRecord->prescriptions) {
+        $medicineCount = $appointment->medicalRecord->prescriptions->count();
+    }
+    $medicineCost = $medicineCount * 50000; 
+
+    $totalBill = $consultationFee + $medicineCost + $adminFee;
+
+    try {
+        // 4. DATABASE TRANSACTION
+        DB::transaction(function () use ($appointment, $totalBill, $consultationFee, $medicineCost) {
+            
+            // A. Update Appointment Status
+            $appointment->update([
+                'status' => 'finished',
+                'ended_at' => Carbon::now()
+            ]);
+
+            // B. Create Payment Detail (Repayment)
+            // We use the EXISTING payment parent record created during booking
+            $payment = $appointment->payment;
+            
+            if ($payment) {
+                $expiredHours = (int) config('services.payment.expired_hours', 24);
+                // Create unique Order ID
+                $orderNumber = 'REPAYMENT-' . $payment->id_payment . now()->format('YmdHis'); 
+
+                // Create the Detail Record
+                $paymentDetail = $payment->paymentDetails()->create([
+                    'amount' => $totalBill,
+                    'payment_type' => 'repayment', // Tagihan Pelunasan
+                    'status_payment' => 'waiting',
+                    'order_number' => $orderNumber,
+                    'expired_at' => now()->addHours($expiredHours)
+                ]);
+
+                // Update Parent Grand Total
+                $payment->increment('grand_total', $totalBill);
+
+                // C. CALL PAYMENT GATEWAY
+                // Adapted from your bookingProcess logic
+                try {
+                    $response = Http::withHeaders([
+                        'X-API-Key' => config('services.payment.api_key'),
+                        'Accept' => 'application/json',
+                    ])->post(config('services.payment.base_url') . '/virtual-account/create', [
+                        'external_id' => $orderNumber,
+                        'amount' => $totalBill,
+                        'customer_name' => $appointment->patient->name,
+                        // Use Patient email, not Doctor email!
+                        'customer_email' => $appointment->patient->user->email, 
+                        'customer_phone' => $appointment->patient->phone,
+                        'description' => 'Pelunasan: Jasa Dokter + ' . ($medicineCost/50000) . ' Obat',
+                        'expired_duration' => $expiredHours,
+                        'callback_url' => route('payments.success', $paymentDetail->id_payment_detail),
+                        'metadata' => [
+                            'product_id' => $paymentDetail->id_payment_detail,
+                            'user_id' => $appointment->patient->id_user,
+                        ],
+                    ]);
+
+                    if ($response->successful()) {
+                        $data = $response->json();
+                        
+                        // Update Payment Detail with VA info
+                        $paymentDetail->update([
+                            'va_number' => $data['data']['va_number'] ?? null,
+                            'payment_url' => $data['data']['payment_url'] ?? null,
+                        ]);
+                    } else {
+                        // Log error but don't crash transaction (allow doctor to finish session)
+                        $paymentDetail->update(['status_payment' => 'failed']);
+                    }
+
+                } catch (\Exception $apiError) {
+                    // Handle API connection errors
+                    $paymentDetail->update(['status_payment' => 'failed']);
+                }
+            }
+        });
 
         return response()->json([
             'success' => true,
-            'message' => 'Appointment selesai',
-            'appointment' => $appointment
+            'message' => 'Sesi selesai. Tagihan Rp ' . number_format($totalBill, 0, ',', '.') . ' telah dikirim ke pasien.',
         ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * Skip appointment (ubah status menjadi finished tanpa ended_at)

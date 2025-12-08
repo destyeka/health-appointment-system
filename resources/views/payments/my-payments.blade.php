@@ -26,9 +26,9 @@
                             <div class="relative rounded-lg border border-gray-200 p-4 mb-3 hover:shadow-md transition">
                                 <div class="flex justify-between items-start"> {{-- ubah items-center -> items-start --}}
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Rp{{ $payment->amount ?? '-' }}</h3>
+                                        <h3 class="font-semibold text-gray-800">Rp{{ $payment?->amount ? number_format($payment->amount, 0, ',', '.') : '-' }}</h3>
                                         <p class="text-sm text-teal-600 font-bold">{{ $payment->payment_type === 'booking' ? 'Booking' : 'Pelunasan' }}</p>
-                                        <p class="text-sm text-gray-400 font-bold">{{ $payment->method === 'bank_transfer' ? 'Transfer Bank' : 'E-Wallet' }}</p>
+                                        <p class="text-sm text-gray-400 font-bold">{{ $payment->method === 'bank_transfer' ? 'Transfer Bank' : ($payment->method === 'e_wallet' ? 'E-Wallet' : '-') }}</p>
                                         
                                     </div>
 
@@ -89,9 +89,9 @@
                             <div class="relative rounded-lg border border-gray-200 p-4 mb-3 hover:shadow-md transition">
                                 <div class="flex justify-between items-start"> {{-- ubah items-center -> items-start --}}
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Rp{{ number_format($payment->amount, 0, ',', '.') ?? '-'}}</h3>
+                                        <h3 class="font-semibold text-gray-800">Rp{{ $payment?->amount ? number_format($payment->amount, 0, ',', '.') : '-' }}</h3>
                                         <p class="text-sm text-teal-600 font-bold">{{ $payment->payment_type === 'booking' ? 'Booking' : 'Pelunasan' }}</p>
-                                        <p class="text-sm text-gray-400 font-bold">{{ $payment->method === 'bank_transfer' ? 'Transfer Bank' : 'E-Wallet' }}</p>
+                                        <p class="text-sm text-gray-400 font-bold">{{ $payment->method === 'bank_transfer' ? 'Transfer Bank' : ($payment->method === 'e_wallet' ? 'E-Wallet' : '-') }}</p>
                                         
                                     </div>
 
