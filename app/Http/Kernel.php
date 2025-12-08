@@ -10,6 +10,7 @@ class Kernel extends HttpKernel
     protected $middlewareAliases = [
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'permission' => \App\Http\Middleware\CheckPermission::class,
     ];
 
     /**
@@ -48,6 +49,6 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         
         // WAJIB: Daftarkan alias kustom 'permission' Anda di sini
-        'permission' => \App\Http\Middleware\CheckPermission::class,
+
     ];
 }
