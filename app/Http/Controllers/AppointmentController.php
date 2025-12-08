@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
+use Illuminate\Support\Facades\DB;
+
 class AppointmentController extends Controller
 {
     /**
@@ -335,30 +337,120 @@ class AppointmentController extends Controller
     /**
      * Tampilkan daftar appointment untuk doctor (hari ini dan 7 hari ke depan)
      */
-    public function doctorAppointments(Request $request)
+    // public function doctorAppointments(Request $request)
+    // {
+    //     $userId = Auth::id();
+
+    //     // Cari doctor berdasarkan id_user
+    //     $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+
+    //     if (!$doctor) {
+    //         return redirect()->route('dashboard')->with('error', 'Data dokter tidak ditemukan.');
+    //     }
+
+    //     // Ambil semua doctor schedules milik doctor ini
+    //     $doctorSchedules = DoctorSchedule::where('id_doctor', $doctor->id_doctor)->pluck('id_doctor_schedule');
+
+    //     // Ambil appointments dari hari ini sampai 7 hari ke depan
+    //     $startDate = Carbon::today();
+    //     $endDate = Carbon::today()->addDays(7);
+
+    //     $query = Appointment::with('patient.user', 'doctorSchedule.doctor')
+    //         ->whereIn('id_doctor_schedule', $doctorSchedules)
+    //         ->whereBetween('appointment_date', [$startDate, $endDate])
+    //         ->where('status', '!=', 'canceled');
+
+    //     // Apply filters
+    //     if ($request->filled('status')) {
+    //         $query->where('status', $request->status);
+    //     }
+
+    //     if ($request->filled('consultation_type')) {
+    //         $query->where('consultation_type', $request->consultation_type);
+    //     }
+
+    //     if ($request->filled('date')) {
+    //         $query->whereDate('appointment_date', $request->date);
+    //     }
+
+    //     $appointments = $query
+    //         ->orderBy('appointment_date', 'asc')
+    //         ->orderBy('appointment_time', 'asc')
+    //         ->get();
+
+    //     // Hitung queue number dan status untuk setiap appointment
+    //     $calculator = new EstimatedWaitTimeCalculator(15, 0);
+
+    //     foreach ($appointments as $appointment) {
+    //         $allAppointments = Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
+    //             ->whereDate('appointment_date', $appointment->appointment_date)
+    //             ->where('status', '!=', 'canceled')
+    //             ->orderBy('appointment_time', 'asc')
+    //             ->get();
+
+    //         $queueNumber = $allAppointments->search(function ($a) use ($appointment) {
+    //             return $a->id_appointment == $appointment->id_appointment;
+    //         }) + 1;
+
+    //         $appointment->queue_number = $queueNumber;
+
+    //         // Format appointment datetime
+    //         $appointmentDate = is_object($appointment->appointment_date)
+    //             ? $appointment->appointment_date->format('Y-m-d')
+    //             : (string) $appointment->appointment_date;
+
+    //         $appointmentTime = is_object($appointment->appointment_time)
+    //             ? $appointment->appointment_time->format('H:i:s')
+    //             : (string) $appointment->appointment_time;
+
+    //         // Hitung estimated wait time
+    //         $waitTimeData = $calculator->calculateByDateTime(
+    //             $appointmentDate,
+    //             $appointmentTime,
+    //             $queueNumber
+    //         );
+
+    //         $appointment->estimated_wait_data = $waitTimeData;
+    //     }
+
+    //     return view('appointments.doctor-appointments', compact('appointments', 'doctor'));
+    // }
+    ///
+
+
+
+    public function doctorCalendar()
     {
         $userId = Auth::id();
-
-        // Cari doctor berdasarkan id_user
-        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+        $doctor = Doctor::where('id_user', $userId)->first();
 
         if (!$doctor) {
             return redirect()->route('dashboard')->with('error', 'Data dokter tidak ditemukan.');
         }
 
-        // Ambil semua doctor schedules milik doctor ini
+        return view('appointments.doctor-calendar', compact('doctor'));
+    }
+
+    public function getCalendarEvents(Request $request)
+    {
+        $userId = Auth::id();
+        $doctor = Doctor::where('id_user', $userId)->first();
+
+        if (!$doctor)
+            return response()->json([]);
+
+        // FullCalendar automatically sends 'start' and 'end' dates
+        $startDate = Carbon::parse($request->start)->startOfDay();
+        $endDate = Carbon::parse($request->end)->endOfDay();
+
         $doctorSchedules = DoctorSchedule::where('id_doctor', $doctor->id_doctor)->pluck('id_doctor_schedule');
 
-        // Ambil appointments dari hari ini sampai 7 hari ke depan
-        $startDate = Carbon::today();
-        $endDate = Carbon::today()->addDays(7);
-
-        $query = Appointment::with('patient.user', 'doctorSchedule.doctor')
+        $query = Appointment::with('patient.user', 'doctorSchedule')
             ->whereIn('id_doctor_schedule', $doctorSchedules)
             ->whereBetween('appointment_date', [$startDate, $endDate])
             ->where('status', '!=', 'canceled');
 
-        // Apply filters
+        // Apply Filters (sent via Javascript)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -367,52 +459,166 @@ class AppointmentController extends Controller
             $query->where('consultation_type', $request->consultation_type);
         }
 
-        if ($request->filled('date')) {
-            $query->whereDate('appointment_date', $request->date);
-        }
-
         $appointments = $query
             ->orderBy('appointment_date', 'asc')
             ->orderBy('appointment_time', 'asc')
             ->get();
 
-        // Hitung queue number dan status untuk setiap appointment
         $calculator = new EstimatedWaitTimeCalculator(15, 0);
 
-        foreach ($appointments as $appointment) {
-            $allAppointments = Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
+        // Transform Data for FullCalendar
+        $events = $appointments->map(function ($appointment) use ($calculator) {
+
+            // --- QUEUE CALCULATION ---
+            // We calculate this fresh for every appointment to ensure accuracy
+            $dayAppointments = Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
                 ->whereDate('appointment_date', $appointment->appointment_date)
                 ->where('status', '!=', 'canceled')
                 ->orderBy('appointment_time', 'asc')
-                ->get();
+                ->pluck('id_appointment'); // Only fetch IDs for speed
 
-            $queueNumber = $allAppointments->search(function ($a) use ($appointment) {
-                return $a->id_appointment == $appointment->id_appointment;
-            }) + 1;
+            // Find index (0-based) and add 1
+            $queueNumber = $dayAppointments->search($appointment->id_appointment) + 1;
 
-            $appointment->queue_number = $queueNumber;
+            // --- WAIT TIME CALCULATION ---
+            $apptDate = is_object($appointment->appointment_date) ? $appointment->appointment_date->format('Y-m-d') : (string) $appointment->appointment_date;
+            $apptTime = is_object($appointment->appointment_time) ? $appointment->appointment_time->format('H:i:s') : (string) $appointment->appointment_time;
 
-            // Format appointment datetime
-            $appointmentDate = is_object($appointment->appointment_date)
-                ? $appointment->appointment_date->format('Y-m-d')
-                : (string) $appointment->appointment_date;
+            $waitData = $calculator->calculateByDateTime($apptDate, $apptTime, $queueNumber);
 
-            $appointmentTime = is_object($appointment->appointment_time)
-                ? $appointment->appointment_time->format('H:i:s')
-                : (string) $appointment->appointment_time;
+            // --- COLOR CODING (Teal Theme) ---
+            $color = '#e0f2f1'; // Default (Teal-50)
+            $textColor = '#0f766e'; // Teal-700
+            $borderColor = '#2dd4bf'; // Teal-400
 
-            // Hitung estimated wait time
-            $waitTimeData = $calculator->calculateByDateTime(
-                $appointmentDate,
-                $appointmentTime,
-                $queueNumber
-            );
+            if ($appointment->status === 'on_going') {
+                $color = '#fef9c3'; // Yellow-100
+                $textColor = '#854d0e'; // Yellow-800
+                $borderColor = '#f59e0b'; // Amber-500
+            } elseif ($appointment->status === 'finished') {
+                $color = '#f3f4f6'; // Gray-100
+                $textColor = '#374151'; // Gray-700
+                $borderColor = '#d1d5db'; // Gray-300
+            }
 
-            $appointment->estimated_wait_data = $waitTimeData;
+            // FullCalendar Event Object
+            return [
+                'id' => $appointment->id_appointment,
+                'title' => "#{$queueNumber} - " . ($appointment->patient->name ?? 'Unknown'),
+                'start' => $apptDate . 'T' . $apptTime, // ISO8601
+                'end' => Carbon::parse($apptDate . ' ' . $apptTime)->addMinutes(15)->toIso8601String(),
+                'backgroundColor' => $color,
+                'borderColor' => $borderColor,
+                'textColor' => $textColor,
+                'extendedProps' => [
+                    'queue' => $queueNumber,
+                    'patient_name' => $appointment->patient->name ?? '-',
+                    'phone' => $appointment->patient->phone ?? '-',
+                    'type' => ucfirst($appointment->consultation_type),
+                    'status' => $appointment->status,
+                    'wait_time' => $waitData,
+                    'formatted_time' => Carbon::parse($apptTime)->format('H:i'),
+                ]
+            ];
+        });
+
+        return response()->json($events);
+    }
+
+    public function manage($id)
+    {
+        $userId = Auth::id();
+        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+
+        // 1. Fetch Appointment & Verify Ownership
+        $appointment = Appointment::with(['patient', 'doctorSchedule', 'payment', 'medicalRecord.prescriptions'])
+            ->where('id_appointment', $id)
+            ->firstOrFail();
+
+        // Security Check: Ensure doctor owns this appointment
+        if ($appointment->doctorSchedule->id_doctor !== $doctor->id_doctor) {
+            abort(403, 'Unauthorized');
         }
 
-        return view('appointments.doctor-appointments', compact('appointments', 'doctor'));
+        // 2. Calculate Queue Number
+        $dayAppointments = Appointment::where('id_doctor_schedule', $appointment->id_doctor_schedule)
+            ->whereDate('appointment_date', $appointment->appointment_date)
+            ->where('status', '!=', 'canceled')
+            ->orderBy('appointment_time', 'asc')
+            ->pluck('id_appointment');
+
+        $queueNumber = $dayAppointments->search($appointment->id_appointment) + 1;
+
+        // 3. Calculate Wait Time
+        $calculator = new EstimatedWaitTimeCalculator(15, 0);
+        $apptDate = is_object($appointment->appointment_date) ? $appointment->appointment_date->format('Y-m-d') : (string) $appointment->appointment_date;
+        $apptTime = is_object($appointment->appointment_time) ? $appointment->appointment_time->format('H:i:s') : (string) $appointment->appointment_time;
+
+        $waitData = $calculator->calculateByDateTime($apptDate, $apptTime, $queueNumber);
+
+        return view('appointments.manage', compact('appointment', 'queueNumber', 'waitData'));
     }
+
+    public function storeMedicalRecord(Request $request, $id)
+    {
+        $request->validate([
+            'diagnosis' => 'required|string',
+            'treatment' => 'required|string',
+            'notes' => 'nullable|string',
+
+            // Updated Validation for new fields
+            'medicines' => 'nullable|array',
+            'medicines.*.medication_name' => 'required_with:medicines|string',
+            'medicines.*.dosage' => 'required_with:medicines|string',
+            'medicines.*.frequency' => 'required_with:medicines|string',
+            'medicines.*.duration' => 'required_with:medicines|string',
+        ]);
+
+        $appointment = Appointment::findOrFail($id);
+
+        if ($appointment->status !== 'on_going') {
+            return back()->with('error', 'Sesi belum dimulai atau sudah selesai.');
+        }
+
+        DB::transaction(function () use ($request, $appointment, $id) {
+            // 1. Save/Update Medical Record
+            $record = $appointment->medicalRecord()->updateOrCreate(
+                ['id_appointment' => $id],
+                [
+                    'diagnosis' => $request->diagnosis,
+                    'treatment' => $request->treatment,
+                    'notes' => $request->notes
+                ]
+            );
+
+            // 2. Handle Prescriptions
+            $record->prescriptions()->delete(); // Reset for update
+
+            if ($request->has('medicines')) {
+                foreach ($request->medicines as $med) {
+                    if (!empty($med['medication_name'])) {
+                        $record->prescriptions()->create([
+                            'medication_name' => $med['medication_name'],
+                            'dosage' => $med['dosage'],
+                            'frequency' => $med['frequency'],
+                            'duration' => $med['duration'],
+                            'prescribed_at' => now(),
+                        ]);
+                    }
+                }
+            }
+        });
+
+        // UPDATE RETURN STATEMENT TO THIS:
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Auto-save successful']);
+        }
+
+        return back()->with('success', 'Rekam medis berhasil disimpan.');
+    }
+
+
+
 
     /**
      * Tampilkan halaman Start/End (dedicated page) untuk doctor
