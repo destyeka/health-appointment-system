@@ -43,7 +43,8 @@
                 @endphp
 
                 @if ($user->id_role == 3)
-                    <a href="{{ route('appointments.my') }}" class="text-gray-700 hover:text-[#009688] transition">Jadwal Appointment</a>
+                    <a href="{{ route('appointments.my') }}" class="text-gray-700 hover:text-[#009688] transition">Konsultasi</a>
+                    <a href="{{ route('payments.my') }}" class="text-gray-700 hover:text-[#009688] transition">Transaksi</a>
                 @endif
 
                 <div class="relative">
