@@ -14,61 +14,42 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        $permissions = [
-            [
-                'permission_name' => 'view_appointment',
-                'description' => 'melihat daftar appointment',
-            ],
-            [
-                'permission_name' => 'update_appointment_status',
-                'description' => 'update status appointment',
-            ],
-            [
-                'permission_name' => 'view_medical_record',
-                'description' => 'melihat medical record',
-            ],
-            [
-                'permission_name' => 'make_medical_record',
-                'description' => 'membuat medical record',
-            ],
-            [
-                'permission_name' => 'view_perscription',
-                'description' => 'melihat perscription/resep obat',
-            ],
-            [
-                'permission_name' => 'make_perscription',
-                'description' => 'membuat perscription/resep obat',
-            ],
-            [
-                'permission_name' => 'view_telemedicine',
-                'description' => 'melihat telemedicine',
-            ],
-            [
-                'permission_name' => 'make_appointment',
-                'description' => 'membuat appointment',
-            ],
-            [
-                'permission_name' => 'make_telemedicine',
-                'description' => 'membuat telemedicine',
-            ],
-            [
-                'permission_name' => 'make_payment',
-                'description' => 'membuat payment',
-            ],
-            [
-                'permission_name' => 'view_schedule',
-                'description' => 'melihat jadwal dokter',
-            ],
-            [
-                'permission_name' => 'make_schedule',
-                'description' => 'membuat jadwal dokter',
-            ],
-            
+        $modules = [
+            'appointment' => 'appointment',
+            'medical_record' => 'medical record',
+            'perscription' => 'perscription/resep obat',
+            'telemedicine' => 'telemedicine',
+            'payment' => 'payment',
+            'schedule' => 'jadwal dokter',
+            'user' => 'user',
+            'doctor' => 'dokter',
+            'patient' => 'pasien',
+            'notification' => 'notifikasi',
         ];
 
-        foreach($permissions as $permission)
-        {
-            Permission::create($permission);
-        };
+        $actions = [
+            'view' => 'melihat',
+            'make' => 'membuat',
+            'edit' => 'mengedit',
+            'delete' => 'menghapus',
+        ];
+
+        $permissions = [];
+
+        foreach ($modules as $module_key => $module_name_id) {
+            foreach ($actions as $action_key => $action_name_id) {
+                // Payment tidak ada action 'edit', jadi kita skip
+                if ($module_key === 'payment' && $action_key === 'edit') {
+                    continue;
+                }
+                
+                $permissions[] = [
+                    'permission_name' => "{$action_key}_{$module_key}",
+                    'description' => "{$action_name_id} {$module_name_id}",
+                ];
+            }
+        }
+
+        Permission::insert($permissions);
     }
 }

@@ -61,4 +61,19 @@ class User extends Authenticatable
         return $this->role 
             && $this->role->permissions()->where('permission_name', $permission)->exists();
     }
+
+    // Helper methods for role checking
+    public function isAdmin(): bool
+    {
+        return $this->getRoleName() === 'admin';
+    }
+    public function isDoctor(): bool
+    {
+        return $this->getRoleName() === 'doctor';
+    }
+    
+    public function isPatient(): bool
+    {
+        return $this->getRoleName() === 'patient';
+    }
 }
