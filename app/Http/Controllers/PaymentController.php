@@ -230,4 +230,10 @@ class PaymentController extends Controller
         return view('payments.my-payments', compact('allPayment','waitingPayment'));
     }
 
+    public function historyDetail(PaymentDetail $paymentDetail)
+    {
+        $details = $paymentDetail->load(['payment.appointment.doctorSchedule.doctor']);
+        return view('payments.my-payments-detail', compact('details'));
+    }
+
 }

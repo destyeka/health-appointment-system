@@ -111,11 +111,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-appointments', [AppointmentController::class, 'myBookedAppointments'])
         ->name('appointments.my');
     Route::get('/my-payments', [PaymentController::class, 'paymentHistory'])
-        ->name('payments.my');
+        ->name('myPayments');
+    Route::get('/my-payments/{paymentDetail}', [PaymentController::class,'historyDetail'])->name('historyDetail');
     
     // Doctor appointments management
-    Route::get('/doctor/appointments', [AppointmentController::class, 'doctorAppointments'])
-        ->name('appointments.doctor');
+    // Route::get('/doctor/appointments', [AppointmentController::class, 'doctorAppointments'])
+    //     ->name('appointments.doctor');
     // Start/End dedicated page
     Route::get('/doctor/start-end', [AppointmentController::class, 'startEnd'])
         ->name('appointments.start_end');
@@ -125,6 +126,18 @@ Route::middleware('auth')->group(function () {
         ->name('appointments.end');
     Route::post('/appointments/{id}/skip', [AppointmentController::class, 'skipAppointment'])
         ->name('appointments.skip');
+
+    // New Doctor Appointment
+    // The Page
+    Route::get('/doctor/schedule', [AppointmentController::class, 'doctorCalendar'])->name('appointments.doctor');
+    
+    // The JSON Data
+    Route::get('/doctor/api/events', [AppointmentController::class, 'getCalendarEvents'])->name('appointments.doctor.api');
+
+    Route::get('/appointments/{id}/manage', [AppointmentController::class, 'manage'])->name('appointments.manage');
+
+    Route::post('/appointments/{id}/record', [AppointmentController::class, 'storeMedicalRecord'])->name('appointments.record.store');
+    
 });
 
 // Route::resource('user-roles', RoleController::class)->parameters([
