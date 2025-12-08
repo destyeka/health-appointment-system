@@ -77,11 +77,12 @@
                             const card = `
                                 <div class="flex justify-between items-center border border-gray-200 bg-white rounded-xl p-5 mb-4 shadow-sm hover:shadow-md transition">
                                     <div class="flex items-center gap-4">
-                                        <img src="https://i.ibb.co/qY8xXfK/default-doctor.png" alt="Doctor" class="w-16 h-16 rounded-md object-cover border">
+                                        <div class="w-16 h-16 rounded-md bg-[#009688] text-white flex items-center justify-center text-2xl border-4 border-white shadow-md relative z-10">
+                                            ${doctor.name.charAt(0).toUpperCase()}
+                                        </div>
                                         <div class="text-left">
                                             <h3 class="font-semibold text-gray-800">${doctor.name}</h3>
                                             <p class="text-sm text-gray-600">${doctor.specialty}</p>
-                                            <a href="/doctor/${doctor.id_doctor}/book" class="text-[#009688] text-sm font-medium hover:underline">Lihat Jadwal</a>
                                         </div>
                                     </div>
                                     <a href="/doctor/${doctor.id_doctor}/book"

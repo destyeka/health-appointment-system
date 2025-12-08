@@ -111,7 +111,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-appointments', [AppointmentController::class, 'myBookedAppointments'])
         ->name('appointments.my');
     Route::get('/my-payments', [PaymentController::class, 'paymentHistory'])
-        ->name('payments.my');
+        ->name('myPayments');
+    Route::get('/my-payments/{paymentDetail}', [PaymentController::class,'historyDetail'])->name('historyDetail');
     
     // Doctor appointments management
     Route::get('/doctor/appointments', [AppointmentController::class, 'doctorAppointments'])
