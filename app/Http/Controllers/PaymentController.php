@@ -201,7 +201,7 @@ class PaymentController extends Controller
             $payment_details->payment->update([
                 'booking_is_paid' => true
             ]);
-        } elseif ($payment_details->payment_type === 'repayment'){
+        } elseif ($payment_details->payment_type === 'repayment') {
             $payment_details->payment->update([
                 'repayment_is_paid' => true
             ]);
@@ -209,4 +209,25 @@ class PaymentController extends Controller
 
         return view('appointments.success', compact('payment_details'));
     }
+
+    public function paymentHistory()
+    {
+        $allPayment = PaymentDetail::whereHas('payment.appointment.patient', function ($query) {
+            $query->where('id_user', auth()->id());
+        })
+            ->with(['payment.appointment.patient'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $waitingPayment = PaymentDetail::whereHas('payment.appointment.patient', function ($query) {
+            $query->where('id_user', auth()->id());
+        })
+        ->where('status_payment', '=', 'waiting')
+            ->with(['payment.appointment.patient'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('payments.my-payments', compact('allPayment','waitingPayment'));
+    }
+
 }
