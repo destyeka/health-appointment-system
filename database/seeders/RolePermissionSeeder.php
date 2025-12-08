@@ -24,13 +24,21 @@ class RolePermissionSeeder extends Seeder
         $doctor_role = Role::where('role_name', 'Doctor')->first();
         $doctor_permissions = Permission::whereIn('permission_name', [
             'view_appointment',
-            'update_appointment',
+            'edit_appointment',
             'view_medical_record',
             'make_medical_record',
+            'edit_medical_record',
             'view_perscription',
             'make_perscription',
+            'edit_perscription',
+            'delete_perscription',
             'view_telemedicine',
-            'view_schedule'
+            'edit_telemedicine',
+            'view_schedule',
+            'view_user',
+            'view_doctor',
+            'view_patient',
+            'view_notification'
         ])->pluck('id_permission');
         $doctor_role->permissions()->attach($doctor_permissions);
 
@@ -38,11 +46,20 @@ class RolePermissionSeeder extends Seeder
         $patient_role = Role::where('role_name', 'Patient')->first();
         $patient_permissions = Permission::whereIn('permission_name', [
             'view_appointment',
-            'update_appointment',
+            'make_appointment',
             'view_medical_record',
             'view_perscription',
             'view_telemedicine',
-            'view_schedule'
+            'view_payment',
+            'make_payment',
+            'view_schedule',
+            'make_user',
+            'view_user',
+            'make_user',
+            'view_doctor',
+            'view_patient',
+            'make_patient',
+            'view_notification'
         ])->pluck('id_permission');
         $patient_role->permissions()->attach($patient_permissions);
     }

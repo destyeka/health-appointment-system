@@ -11,9 +11,11 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\WebhookController;
+use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\CheckPermission;
 
 Route::get('/', function () {
     return view('landing');
@@ -53,34 +55,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // == RUTE UNTUK ADMIN (CRUD) ==
-    // Rute resource ini harus di dalam middleware 'auth'
-    Route::resource('user-roles', RoleController::class);
-    Route::resource('permissions', PermissionController::class);
-    // Catatan: Route::resource('doctors', ...) sudah membuat semua rute
-    // doctors.index, doctors.create, doctors.store, dll.
-    // yang digunakan oleh file DoctorController Anda.
-
-    // == RUTE UNTUK PASIEN (FITUR CARI DOKTER) ==
     
-    // 1. Rute untuk menampilkan halaman (HTML)
-    // Mengarah ke fungsi showSearchPage yang kita buat
     Route::get('/cari-dokter', [DoctorController::class, 'showSearchPage'])
-         ->name('doctors.searchPage');
+    ->name('doctors.searchPage');
 
-    // 2. Rute untuk API "Fetching" (JSON)
-    // Mengarah ke fungsi searchApi yang kita buat
     Route::get('/doctors-search-api', [DoctorController::class, 'searchApi'])
-         ->name('doctors.api.search');
-
+    ->name('doctors.api.search');
+    
     Route::get('/doctor/{doctor}/book', [DoctorController::class, 'bookDoctor'])->name('doctor.details');
-
-
-
+    
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     
 
+    Route::resource('permissions', PermissionController::class);
     Route::resource('doctors', DoctorController::class);
     Route::resource('doctor-schedules', DoctorScheduleController::class);
     Route::resource('patients', PatientController::class);
@@ -100,6 +87,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/payments/{payment_details}/success', [PaymentController::class, 'success'])->name('payments.success');
 
 });
+
+
     // == RUTE UNTUK ADMIN (Kelola Appointment) ==
     Route::get('/admin/appointments', [AppointmentController::class, 'adminIndex'])
         ->name('admin.appointments.index');
