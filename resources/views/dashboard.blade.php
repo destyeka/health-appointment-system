@@ -41,6 +41,9 @@
                             <a href="{{ route('prescriptions.index') }}" class="block p-4 bg-white rounded-lg shadow hover:bg-pink-200 transition">
                                 <span class="font-semibold text-gray-900">Kelola Resep Obat</span>
                             </a>
+                            <a href="{{ route('payments.index') }}" class="block p-4 bg-white rounded-lg shadow hover:bg-pink-200 transition">
+                                <span class="font-semibold text-gray-900">Kelola Pembayaran</span>
+                            </a>
                             <a href="{{ route('notifications.index') }}" class="block p-4 bg-white rounded-lg shadow hover:bg-indigo-200 transition">
                                 <span class="font-semibold text-gray-900">Kelola Notifikasi</span>
                             </a>

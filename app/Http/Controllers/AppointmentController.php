@@ -535,7 +535,7 @@ class AppointmentController extends Controller
     public function manage($id)
     {
         $userId = Auth::id();
-        $doctor = \App\Models\Doctor::where('id_user', $userId)->first();
+        $doctor = Doctor::where('id_user', $userId)->first();
 
         // 1. Fetch Appointment & Verify Ownership
         $appointment = Appointment::with(['patient', 'doctorSchedule', 'payment', 'medicalRecord.prescriptions'])

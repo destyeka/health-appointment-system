@@ -21,7 +21,6 @@
 
         {{-- Navigation --}}
         <nav class="flex items-center space-x-6 text-sm">
-            <a href="{{ route('doctors.searchPage') }}" class="text-gray-700 hover:text-[#009688] transition">Cari Dokter</a>
 
             {{-- ======= DROPDOWN USER (AUTH) ======= --}}
             @auth
@@ -43,6 +42,7 @@
                 @endphp
 
                 @if ($user->id_role == 3)
+                    <a href="{{ route('doctors.searchPage') }}" class="text-gray-700 hover:text-[#009688] transition">Cari Dokter</a>
                     <a href="{{ route('appointments.my') }}" class="text-gray-700 hover:text-[#009688] transition">Konsultasi</a>
                     <a href="{{ route('myPayments') }}" class="text-gray-700 hover:text-[#009688] transition">Transaksi</a>
                 @endif

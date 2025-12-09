@@ -11,7 +11,7 @@
                 </div>
                 <a href="{{ route('myPayments') }}"
                     class="text-gray-500 hover:text-gray-900 font-medium text-sm flex items-center gap-2">
-                    &larr; Kembali ke Dashboard
+                    &larr; Kembali ke Transaksi
                 </a>
             </div>
 

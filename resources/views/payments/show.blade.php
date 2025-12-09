@@ -13,10 +13,6 @@
                     </p>
                 </div>
                 <div class="flex space-x-3">
-                    <a href="{{ route('payments.edit', $payment) }}" 
-                       class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
-                        Edit payment
-                    </a>
                     <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this payment?')">
                         @csrf
                         @method('DELETE')
