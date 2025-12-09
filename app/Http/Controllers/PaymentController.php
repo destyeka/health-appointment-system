@@ -208,21 +208,39 @@ class PaymentController extends Controller
                 'booking_is_paid' => true
             ]);
 
+            // ... inside the success method ...
+
             // --- START: TELEMEDICINE TRIGGER ---
             $appointment = $payment_details->payment->appointment;
 
             // Check if it is Online AND if a session hasn't been created yet
             if ($appointment->consultation_type === 'online' && !$appointment->telemedicine) {
 
-                // Generate Unique Room Name: "MedBook-{ApptID}-{RandomString}"
-                $roomName = 'MedBook-' . $appointment->id_appointment . '-' . Str::random(8);
-                $sessionLink = 'https://meet.jit.si/' . $roomName;
+                // 1. Get Doctor's Phone Number
+                // Ensure we access the doctor through the schedule
+                $doctor = $appointment->doctorSchedule->doctor;
+                $phone = $doctor->phone; // e.g. "08123456789"
 
-                // Create Record
+                // 2. Format Phone to International (Indonesian +62 example)
+                // WhatsApp requires the country code without the '+'
+                if (substr($phone, 0, 1) === '0') {
+                    $phone = '62' . substr($phone, 1);
+                }
+
+                // 3. Construct the Message
+                $message = "Halo {$doctor->name}, saya pasien atas nama {$appointment->patient->name}.\n\n" .
+                    "Saya telah menyelesaikan pembayaran untuk sesi konsultasi online (ID: #{$appointment->id_appointment}).\n" .
+                    "Mohon informasinya untuk memulai sesi. Terima kasih.";
+
+                // 4. Generate the WhatsApp Link
+                // urlencode() ensures spaces and special characters are safe for the URL
+                $sessionLink = "https://wa.me/{$phone}?text=" . urlencode($message);
+
+                // 5. Create Record
                 Telemedicine::create([
                     'id_appointment' => $appointment->id_appointment,
-                    'session_link' => $sessionLink,
-                    'status' => 'waiting' // Waiting for doctor
+                    'session_link' => $sessionLink, // Now stores the WA link
+                    'status' => 'waiting'
                 ]);
             }
             // --- END: TELEMEDICINE TRIGGER ---

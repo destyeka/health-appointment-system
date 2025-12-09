@@ -69,7 +69,7 @@
                                             </div>
                                 </div>
                                 <div class="flex justify-end">
-                                    <a href="" class="border border-[#009688] text-[#009688] px-4 py-2 rounded-md text-sm hover:bg-[#009688] hover:text-white transition">
+                                    <a href="{{ route('appointments.my-detail', $appointment) }}" class="border border-[#009688] text-[#009688] px-4 py-2 rounded-md text-sm hover:bg-[#009688] hover:text-white transition">
                                         Lihat Detail
                                     </a>
                                 </div>
@@ -216,7 +216,7 @@
                                             </div>
                                 </div>
                                 <div class="flex justify-end">
-                                    <a href="" class="border border-[#009688] text-[#009688] px-4 py-2 rounded-md text-sm hover:bg-[#009688] hover:text-white transition">
+                                    <a href="{{ route('appointments/my-detail', $appointment) }}" class="border border-[#009688] text-[#009688] px-4 py-2 rounded-md text-sm hover:bg-[#009688] hover:text-white transition">
                                         Lihat Detail
                                     </a>
                                 </div>

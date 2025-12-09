@@ -335,6 +335,12 @@ class AppointmentController extends Controller
         return view('appointments.my_booked_appointments', compact('appointments', 'appointmentHistory'));
     }
 
+    public function myAppointmentDetail(Appointment $appointmentDetail)
+    {
+        $details = $appointmentDetail->load(['medicalRecord.prescriptions','telemedicine','doctorSchedule.doctor']);
+        return view('appointments.my-appointment-details', compact('details'));
+    }
+
     /**
      * Tampilkan daftar appointment untuk doctor (hari ini dan 7 hari ke depan)
      */
