@@ -175,6 +175,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-appointments', [AppointmentController::class, 'myBookedAppointments'])
         ->middleware('permission:view_appointment')
         ->name('appointments.my');
+    Route::get('/my-appointments/{appointmentDetail}', [AppointmentController::class, 'myAppointmentDetail'])
+        ->middleware('permission:view_appointment')
+        ->name('appointments.my-detail');
     Route::get('/my-payments', [PaymentController::class, 'paymentHistory'])
         ->middleware('permission:view_payment')
         ->name('myPayments');
@@ -226,7 +229,8 @@ Route::middleware('auth')->group(function () {
         ->name('notifications.destroy');
 });
 
-// Route Webhook tidak perlu autentikasi atau CSRF
+
+
 Route::post('/webhook/payment', [WebhookController::class, 'handlePayment'])->name('webhook.payment')->withoutMiddleware([VerifyCsrfToken::class]);
 
 require __DIR__.'/auth.php';
