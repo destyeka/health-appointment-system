@@ -115,9 +115,9 @@
                 
                 // CHANGE 2: Adjust header to prioritize Day/Week toggles
                 headerToolbar: {
-                    left: 'prev,next today',
+                    left: 'prev next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridDay,listWeek' // Removed Month view to focus on slots
+                    right: 'dayGridMonth timeGridDay listWeek' // Removed Month view to focus on slots
                 },
 
                 // Calendar Settings

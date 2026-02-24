@@ -145,7 +145,7 @@
 
                         {{-- Header --}}
                         <div class="flex justify-between items-center pb-2 border-b border-gray-50 mb-2">
-                            <p class="text-xs text-gray-400 uppercase tracking-wider font-bold">History</p>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider font-bold">Detail Waktu</p>
                             @switch($details->status)
                                 @case('scheduled')
                                     <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Dijadwalkan</span>

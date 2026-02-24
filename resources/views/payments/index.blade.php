@@ -7,12 +7,6 @@
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     {{ __("Daftar Payment") }}
                 </h2>
-                <form action="{{ route('payments.store') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Add New Payment
-                    </button>
-                </form>
                 {{-- <a href="{{ route('payments.store') }}" 
                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Add New Payment
@@ -63,7 +57,6 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('payments.show', $payment) }}" class="text-green-600 hover:text-green-900 mr-3">View</a>
-                                                <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
                                                 <form action="{{ route('payments.destroy', $payment) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this payment?')">
                                                     @csrf
                                                     @method('DELETE')

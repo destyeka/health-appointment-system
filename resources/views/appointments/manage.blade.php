@@ -12,8 +12,8 @@
             {{-- Header --}}
             <div class="flex justify-between items-center mb-6 px-4 md:px-0">
                 <div>
-                    <h2 class="font-bold text-2xl text-gray-800">Manajemen Sesi</h2>
-                    <p class="text-sm text-gray-500">Antrian No. {{ $queueNumber }}</p>
+                    <h2 class="font-bold text-2xl text-gray-800">Sesi Konsultasi</h2>
+                    <p class="text-sm text-gray-500">ID {{ $appointment->id_appointment }}</p>
                 </div>
                 <a href="{{ route('appointments.doctor') }}"
                     class="text-gray-500 hover:text-gray-900 font-medium text-sm flex items-center gap-2">
@@ -113,11 +113,15 @@
                         <p class="text-sm text-gray-500 mb-1">Nomor Antrian Saat Ini</p>
                         <div class="text-5xl font-extrabold text-[#009688]">#{{ $queueNumber }}</div>
                         @if($appointment->status == 'scheduled')
-                            <div class="mt-4 bg-yellow-50 border border-yellow-100 p-3 rounded-xl inline-block">
-                                <p class="text-xs text-yellow-800 font-bold">⏳ Estimasi Menunggu: <span
-                                        class="font-normal">{{ is_array($waitData) ? ($waitData['formatted'] ?? '-') : $waitData }}</span>
-                                </p>
-                            </div>
+                                <div class="mt-4 bg-yellow-50 border border-yellow-100 p-3 rounded-xl inline-block">
+                                    <p class="text-xs text-yellow-800 font-bold">
+                                        ⏳ Estimasi Menunggu: 
+                                        <span class="font-normal">
+                                            {{-- Updated to check for 'text' key first --}}
+                                            {{ is_array($waitData) ? ($waitData['text'] ?? $waitData['formatted'] ?? '-') : $waitData }}
+                                        </span>
+                                    </p>
+                                </div>
                         @endif
                     </div>
 
